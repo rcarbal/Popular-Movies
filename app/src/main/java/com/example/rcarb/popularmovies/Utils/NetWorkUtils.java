@@ -7,7 +7,8 @@ import java.net.URL;
 import java.util.Scanner;
 
 /**
- * Created by rcarb on 8/4/2017.
+ * Java class that connects to internet and extracts the JSON return of a query call.
+ * Supplied by Udacity class section Connect to the internet.
  */
 
 public class NetWorkUtils {

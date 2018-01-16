@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">Popular Movies</string>
+
+<!--activity_detail strings-->
+    <string name="movie_poster">ImageView to load movie poster</string>
+
+    <!--Menu strings-->
+    <string name="popular_query">Most Popular</string>
+    <string name="top_rated_query">Highest Rated</string>
+    <string name="favorites_collection">Favorites</string>
+    <string name="favorite_movie">Mark as Favorite</string>
+
+
+    <!--DetailActivies InageView's content description-->
+    <string name="not_filled">star is not filled</string>
+    <string name="is_filled">star is filled</string>
+    <string name="trailer_section">Trailers:</string>
+    <string name="trailer_label1">Trailer 1</string>
+    <string name="trailer_label2">Trailer 2</string>
+    <string name="trailer_label3">Trailer 3</string>
+    <string name="review_label">Reviews</string>
+    <string name="max_rating" translatable="false"> 10</string>
 </resources>

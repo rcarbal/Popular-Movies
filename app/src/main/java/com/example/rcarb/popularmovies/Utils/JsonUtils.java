@@ -1,20 +1,18 @@
 package com.example.rcarb.popularmovies.Utils;
 
-import android.content.ContentValues;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URL;
 import java.util.ArrayList;
 
-/**
- * Created by rcarb on 10/19/2017.
- */
 
 public class JsonUtils {
 
-    public static ArrayList<MovieInfoHolder> parseJsonObject(String jsonDataString) throws JSONException {
+    //Parses the movieArray object that haolds all the movies for popular or top rated parse.
+
+    public static ArrayList<MovieInfoHolder> parseJsonObject(String jsonDataString, String listType) throws JSONException {
 
         JSONObject jsonData = new JSONObject(jsonDataString);
 
@@ -23,20 +21,17 @@ public class JsonUtils {
 
         //StringArray to hold the movie poster
         ArrayList<MovieInfoHolder> movieArray = new ArrayList<>();
-        for (int i = 0; i < resultsInData.length(); i++){
+        for (int i = 0; i < resultsInData.length(); i++) {
 
             JSONObject object = resultsInData.getJSONObject(i);
-            if (object != null){
-
-                int movieId =(int)object.get("id");
-                String moviePoster =(String)object.get("poster_path");
-                String movieTitle = (String)object.get("title");
-                String releaseDate = (String)object.get("release_date");
-
-                //TODO: need to add MovieLength.
+            if (object != null) {
+                int movieId = (int) object.getInt("id");
+                String moviePoster = (String) object.get("poster_path");
+                String movieTitle = (String) object.get("title");
+                String releaseDate = (String) object.get("release_date");
 
                 String movieRating = object.get("vote_average").toString();
-                String movieDesctiption = (String)object.get("overview");
+                String movieDescription = (String) object.get("overview");
 
                 //Add the movie values into MovieInfoHolder.
                 MovieInfoHolder movieInfo = new MovieInfoHolder();
@@ -46,21 +41,70 @@ public class JsonUtils {
                 movieInfo.setMovieReleaseDate(releaseDate);
 
                 movieInfo.setMovieRating(movieRating);
-                movieInfo.setMovieDescription(movieDesctiption);
+                movieInfo.setMovieDescription(movieDescription);
+                movieInfo.setFavorite(false);
+                movieInfo.setColumn(0);
+                movieInfo.setListDescription(listType);
 
-
-                movieArray.add(i,movieInfo);
+                movieArray.add(i, movieInfo);
 
             }
         }
         return movieArray;
     }
 
+    //Creates the array object for the  trailers of specified movie.
+
+    public static ArrayList<TrailerInfoHolder> parseJsonTrailerObject(String jsonDataString)throws JSONException{
+        JSONObject jsondata = new JSONObject(jsonDataString);
+
+        JSONArray resultsInData = jsondata.getJSONArray("results");
+
+        //ArrayList that will hold the movie trailer keys
+        ArrayList<TrailerInfoHolder> trailerArray =  new ArrayList<>();
+        for (int i = 0; i < resultsInData.length(); i++){
+            JSONObject object = resultsInData.getJSONObject(i);
+            if (object != null){
+
+                //Extract the movie key
+                String movieKey = object.getString("key");
+
+                //add the movie key to the array object
+                TrailerInfoHolder trailerKeyHolder = new TrailerInfoHolder();
+                trailerKeyHolder.setTrailerKey(movieKey);
+                trailerArray.add(trailerKeyHolder);
+
+            }
+        }
+        return trailerArray;
+    }
+
+    //Returns an array for the reviews of a specified movie.
+
+    public static ArrayList<MovieReviewObject> parseReviewsForMovie(String movieIdReviews) throws JSONException {
+
+        JSONObject jsonData = new JSONObject(movieIdReviews);
+
+        JSONArray resultsInJsonObject = jsonData.getJSONArray("results");
+
+        ArrayList<MovieReviewObject> arrayListOfReviews = new ArrayList<>();
+        for (int i = 0; i <resultsInJsonObject.length(); i++){
+            JSONObject object = resultsInJsonObject.getJSONObject(i);
+            if (object != null){
+
+                //Extract the reviews
+                String name = object.getString("author");
+                String review = object.getString("content");
+
+                //set the extracted information to a ReviewObhect
+                MovieReviewObject reviewObject = new MovieReviewObject();
+                reviewObject.setAuthorName(name);
+                reviewObject.setReview(review);
+
+                arrayListOfReviews.add(reviewObject);
+            }
+        }
+        return arrayListOfReviews;
+    }
+
 }
-//    public int idOfMovie;
-//    public String moviePoster;
-//    public String titleOfMovie;
-//    public String releaseDate;
-//    public int movieLength;
-//    public int rating;
-//    public String movieDescription;

@@ -8,6 +8,7 @@
         android:layout_height="match_parent"
         android:id="@+id/rv_image_view"
         android:scaleType="centerCrop"
+        android:contentDescription="@string/movie_poster"
         />
 
 </FrameLayout>
