@@ -4,6 +4,7 @@ package com.example.rcarb.popularmovies.Data;
  * Created by rcarb on 11/4/2017.
  */
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
@@ -12,11 +13,18 @@ import android.provider.BaseColumns;
 
 public class Contract {
 
-    private Contract() {
+    //Authority for the uri matcher.
+    public static final String AUTHORITY = "com.example.rcarb.popularmovies";
 
-    }
+    //String for accessing the favorite table.
+    public final static Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
+
+    public static final String PATH_FAVORITES = "Favorites_Movies";
 
     public static class MovieEntry implements BaseColumns {
+        //Urii that ponts to the favorites table.
+        public static final Uri BASE_CONTENT_URI_FAVORITES=
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_FAVORITES).build();
 
         public static final String TABLE_NAME = " Favorite_Movies";
         public static final String COLUMN_MOVIE_TITLE = "Title";

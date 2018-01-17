@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,8 +33,6 @@ import java.util.ArrayList;
 public class DetailActivity extends AppCompatActivity {
 
     private MovieInfoHolder movieInfoHolder;
-    private FavoriteMovieDbHelper mMovieDbHelper;
-    private SQLiteDatabase mDatabse;
     private ArrayList<TrailerInfoHolder> mActivityTrailer;
     private GetMovieInfoTask task;
 
@@ -67,10 +66,6 @@ public class DetailActivity extends AppCompatActivity {
             instanceStateLoaded = true;
         }
         setContentView(R.layout.activity_detail);
-
-        //Initiate the DBHelper class
-        mMovieDbHelper = new FavoriteMovieDbHelper(this);
-
         getActivityIntent();
         setupLayout();
 
@@ -236,8 +231,6 @@ public class DetailActivity extends AppCompatActivity {
      * Save's the current movie details that are being displayed into the FavoriteMovies.db file.
      */
     private void setAsFavorite() {
-        mDatabse = mMovieDbHelper.getWritableDatabase();
-
         //The Content that goes into the databse.
         int idf = movieInfoHolder.getMovieId();
         ContentValues values = new ContentValues();
@@ -248,7 +241,7 @@ public class DetailActivity extends AppCompatActivity {
         values.put(Contract.MovieEntry.COLUMN_MOVIE_RATING, movieInfoHolder.getMovieRating());
         values.put(Contract.MovieEntry.COLUMN_MOVIE_DESCRIPTION, movieInfoHolder.getMovieDescription());
 
-        long id = mDatabse.insert(Contract.MovieEntry.TABLE_NAME, null, values);
+        getContentResolver().insert(Contract.MovieEntry.BASE_CONTENT_URI_FAVORITES,values);
     }
 
     //Sets the TrailerLayout
@@ -288,13 +281,12 @@ public class DetailActivity extends AppCompatActivity {
      */
 
     private void removeFromFavorite(long id) {
-        mDatabse = mMovieDbHelper.getWritableDatabase();
-        try {
-            mDatabse.delete(Contract.MovieEntry.TABLE_NAME,
-                    Contract.MovieEntry._ID + "=" + id, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        //Build the uri for the given id.
+        String stringId = Long.toString(id);
+        Uri uri = Contract.MovieEntry.BASE_CONTENT_URI_FAVORITES;
+        uri = uri.buildUpon().appendPath(stringId).build();
+
+        getContentResolver().delete(uri, null, null);
     }
 
     class GetMovieInfoTask extends AsyncTask<Integer, Void, String>{

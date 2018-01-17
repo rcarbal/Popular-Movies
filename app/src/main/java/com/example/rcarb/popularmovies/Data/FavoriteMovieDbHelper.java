@@ -24,7 +24,8 @@ public class FavoriteMovieDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        onUpgrade(db, oldVersion, newVersion);
+        db.execSQL(Contract.MovieEntry.SQL_DELETE_ENTRIES);
+        onCreate(db);
     }
 
 

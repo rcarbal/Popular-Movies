@@ -26,6 +26,10 @@
             android:name=".DetailActivity">
 
         </activity>
+        <provider
+            android:authorities="com.example.rcarb.popularmovies"
+            android:name=".Data.ContentProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

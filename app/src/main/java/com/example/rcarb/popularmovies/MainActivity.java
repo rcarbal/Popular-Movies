@@ -45,8 +45,6 @@ public class MainActivity extends AppCompatActivity
     private String[] mMoviesArray;
 
     //Database global variables
-    private FavoriteMovieDbHelper mMovieDbHelper;
-    private SQLiteDatabase mDatabse;
 
     private String stateOfActivity = "";
     private boolean favoriteState = false;
@@ -130,17 +128,13 @@ public class MainActivity extends AppCompatActivity
 
     //Reads the databse of favorite movies
     private Cursor getAllFavoriteMovies() {
-        mMovieDbHelper = new FavoriteMovieDbHelper(this);
-        //Set the readable databse
-        mDatabse = mMovieDbHelper.getReadableDatabase();
-        return mDatabse.query(
-                Contract.MovieEntry.TABLE_NAME,
-                null,
-                null,
+        Cursor cursor ;
+        cursor = getContentResolver().query(Contract.MovieEntry.BASE_CONTENT_URI_FAVORITES,
                 null,
                 null,
                 null,
                 null);
+        return cursor;
     }
 
     //Gets the row of a movies title is located in the database.
