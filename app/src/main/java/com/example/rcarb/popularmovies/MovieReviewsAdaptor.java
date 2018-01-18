@@ -11,10 +11,7 @@ import com.example.rcarb.popularmovies.Utils.MovieReviewObject;
 
 import java.util.ArrayList;
 
-/**
- * Created by rcarb on 11/28/2017.
- */
-
+@SuppressWarnings("ConstantConditions")
 public class MovieReviewsAdaptor extends RecyclerView.Adapter<MovieReviewsAdaptor.ReviewViewHolder>{
 
     private final ArrayList<MovieReviewObject> reviews;

@@ -91,6 +91,7 @@ public class UriBuilderUtil {
     //Uri used for opening the intent for youtube trailer.
 
     public static Uri buildTrailerUri(String trailerKey){
+        @SuppressWarnings("UnnecessaryLocalVariable")
         Uri builtUri =
                 Uri.parse(BASE_YOUTUBE_URL).buildUpon()
                 .appendQueryParameter(BASE_VIDEO, trailerKey)
@@ -113,6 +114,23 @@ public class UriBuilderUtil {
             e.printStackTrace();
         }
         return url;
+    }
+
+    //Uri for getting json parse for movie detail.
+    public static URL parseMovieDetail(int movieId){
+        Uri builtUri =
+                Uri.parse(BASE_TRAILER_URL).buildUpon()
+                        .appendPath(String.valueOf(movieId))
+                        .appendQueryParameter(mQueryWithAPIKey, API_KEY)
+                        .build();
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        return url;
+
     }
 
 

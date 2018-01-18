@@ -20,4 +20,7 @@
     <string name="trailer_label3">Trailer 3</string>
     <string name="review_label">Reviews</string>
     <string name="max_rating" translatable="false"> 10</string>
+
+    <string name="ph_text" translatable="false">no movie length</string>
+    <string name="minutes_text" >%1$s mins</string>
 </resources>

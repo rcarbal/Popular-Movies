@@ -4,10 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-/**
- * Created by rcarb on 11/4/2017.
- */
-
+@SuppressWarnings("WeakerAccess")
 public class FavoriteMovieDbHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;

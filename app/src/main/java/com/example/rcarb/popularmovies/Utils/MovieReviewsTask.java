@@ -1,27 +1,21 @@
 package com.example.rcarb.popularmovies.Utils;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.widget.TextView;
 
 import com.example.rcarb.popularmovies.DetailActivity;
 import com.example.rcarb.popularmovies.MovieReviewsAdaptor;
 import com.example.rcarb.popularmovies.R;
 
 import org.json.JSONException;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-/**
- * Created by rcarb on 11/27/2017.
- */
-
+@SuppressWarnings({"ConstantConditions", "StatementWithEmptyBody"})
 public class MovieReviewsTask extends AsyncTask<Integer, Void, String> {
 
     private final WeakReference<Activity> mWeakActivity;
@@ -68,7 +62,7 @@ public class MovieReviewsTask extends AsyncTask<Integer, Void, String> {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(activity);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        int size = movieArrayOfMovieReviews.size();
+        int size = movieArrayOfMovieReviews != null ? movieArrayOfMovieReviews.size() : 0;
 
         RecyclerView.Adapter mAdaptor = new MovieReviewsAdaptor(size, movieArrayOfMovieReviews);
         mRecyclerView.setNestedScrollingEnabled(false);

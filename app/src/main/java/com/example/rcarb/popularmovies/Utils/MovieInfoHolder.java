@@ -7,7 +7,8 @@ import android.os.Parcelable;
 /**
  * Java class that has getter and setter methods to hold movie information.
  */
-public class MovieInfoHolder implements Parcelable {
+@SuppressWarnings({"WeakerAccess", "unused", "SimplifiableIfStatement"})
+public class MovieInfoHolder implements Parcelable{
     private int movieId;
     private String moviePoster;
     private String movieTitle;
@@ -20,37 +21,55 @@ public class MovieInfoHolder implements Parcelable {
     private String mListDescription;
 
     public MovieInfoHolder() {
-
     }
 
-    public MovieInfoHolder(int movieId,
-                           String moviePoster,
-                           String movieTitle,
-                           String movieReleaseDate,
-                           int movieLength,
-                           String movieRating,
-                           String movieDescription,
-                           boolean isFavorite,
-                           long movieDatabaseColumn,
-                           String listDescription) {
 
-
-        this.movieId = movieId;
-        this.moviePoster = moviePoster;
-        this.movieTitle = movieTitle;
-        this.movieReleaseDate = movieReleaseDate;
-        this.movieLength = movieLength;
-        this.movieRating = movieRating;
-        this.movieDescription = movieDescription;
-        this.mFavorite = isFavorite;
-        this.databaseColumn = movieDatabaseColumn;
-        this.mListDescription = listDescription;
+    protected MovieInfoHolder(Parcel in) {
+        movieId = in.readInt();
+        moviePoster = in.readString();
+        movieTitle = in.readString();
+        movieReleaseDate = in.readString();
+        movieLength = in.readInt();
+        movieRating = in.readString();
+        movieDescription = in.readString();
+        mFavorite = in.readByte() != 0;
+        databaseColumn = in.readLong();
+        mListDescription = in.readString();
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(movieId);
+        dest.writeString(moviePoster);
+        dest.writeString(movieTitle);
+        dest.writeString(movieReleaseDate);
+        dest.writeInt(movieLength);
+        dest.writeString(movieRating);
+        dest.writeString(movieDescription);
+        dest.writeByte((byte) (mFavorite ? 1 : 0));
+        dest.writeLong(databaseColumn);
+        dest.writeString(mListDescription);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<MovieInfoHolder> CREATOR = new Creator<MovieInfoHolder>() {
+        @Override
+        public MovieInfoHolder createFromParcel(Parcel in) {
+            return new MovieInfoHolder(in);
+        }
+
+        @Override
+        public MovieInfoHolder[] newArray(int size) {
+            return new MovieInfoHolder[size];
+        }
+    };
 
     public void setMovieId(int movieId) {
         this.movieId = movieId;
-
     }
 
     public int getMovieId() {
@@ -117,11 +136,14 @@ public class MovieInfoHolder implements Parcelable {
         this.databaseColumn = column;
     }
 
+    public long getColumn() {
+        return this.databaseColumn;
+    }
+
     public void setListDescription(String descriptionType) {
 
         this.mListDescription = descriptionType;
     }
-
     public String getListDescrition() {
         return mListDescription;
     }
@@ -136,62 +158,13 @@ public class MovieInfoHolder implements Parcelable {
     //Special method that reads boolean from parcel
     private static boolean readBoolean(Parcel in) {
         if (in != null) {
-            return in.readInt() == 1 ? true : false;
+            return in.readInt() == 1;
         }
         return false;
     }
 
-    public long getColumn() {
-        return this.databaseColumn;
-    }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(movieId);
-        dest.writeString(moviePoster);
-        dest.writeString(movieTitle);
-        dest.writeString(movieReleaseDate);
-        dest.writeInt(movieLength);
-        dest.writeString(movieRating);
-        dest.writeString(movieDescription);
-        writeBoolean(dest, mFavorite);
-        dest.writeLong(databaseColumn);
-        dest.writeString(mListDescription);
-    }
 
-    //Parcel Creator
-    public static final Parcelable.Creator CREATOR
-            = new ClassLoaderCreator() {
-        @Override
-        public MovieInfoHolder createFromParcel(Parcel in) {
-            return new MovieInfoHolder(in);
-        }
-
-        @Override
-        public Object[] newArray(int size) {
-            return new Object[0];
-        }
-
-        @Override
-        public Object createFromParcel(Parcel source, ClassLoader loader) {
-            return null;
-        }
-    };
-
-    private MovieInfoHolder(Parcel in) {
-        movieId = in.readInt();
-        moviePoster = in.readString();
-        movieTitle = in.readString();
-        movieReleaseDate = in.readString();
-        movieLength = in.readInt();
-        movieRating = in.readString();
-        movieDescription = in.readString();
-        mFavorite = readBoolean(in);
-    }
 }
 

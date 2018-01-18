@@ -1,8 +1,5 @@
 package com.example.rcarb.popularmovies.Data;
 
-/**
- * Created by rcarb on 11/4/2017.
- */
 
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -11,6 +8,7 @@ import android.provider.BaseColumns;
  * Thihs contract class for inserting data into the the SQLdatabase.
  */
 
+@SuppressWarnings("WeakerAccess")
 public class Contract {
 
     //Authority for the uri matcher.

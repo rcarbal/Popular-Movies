@@ -13,15 +13,16 @@ import com.example.rcarb.popularmovies.Utils.UriBuilderUtil;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
+@SuppressWarnings("ConstantConditions")
 public class GridViewAdapter extends RecyclerView.Adapter<GridViewAdapter.ImageViewHolder> {
 
     private final int mNumberOfItems;
     private final ArrayList<MovieInfoHolder> mMovieArrayList;
     private final OnItemClicked mOnClick;
 
+    @SuppressWarnings("unused")
     public interface OnItemClicked {
         void onItemClick(int mNumberOfItemsIndex, int movieId);
     }

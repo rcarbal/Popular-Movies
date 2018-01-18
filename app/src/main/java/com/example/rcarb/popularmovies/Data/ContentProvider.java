@@ -8,11 +8,11 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 
+@SuppressWarnings("ConstantConditions")
 public class ContentProvider extends android.content.ContentProvider {
 
     //Integer constants that will be used on the Uri Matcher.
@@ -74,7 +74,6 @@ public class ContentProvider extends android.content.ContentProvider {
         }
         //tell the cursor what content uri it was created for.
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
-        String a = DatabaseUtils.dumpCursorToString(cursor);
         return cursor;
     }
 

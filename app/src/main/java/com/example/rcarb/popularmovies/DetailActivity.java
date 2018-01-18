@@ -1,12 +1,13 @@
 package com.example.rcarb.popularmovies;
 
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -16,7 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.rcarb.popularmovies.Data.Contract;
-import com.example.rcarb.popularmovies.Data.FavoriteMovieDbHelper;
+import com.example.rcarb.popularmovies.Data.GetMovieDetailLoader;
 import com.example.rcarb.popularmovies.Utils.JsonUtils;
 import com.example.rcarb.popularmovies.Utils.MovieInfoHolder;
 import com.example.rcarb.popularmovies.Utils.MovieReviewsTask;
@@ -30,10 +31,12 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+@SuppressWarnings({"WeakerAccess", "CanBeFinal"})
 public class DetailActivity extends AppCompatActivity {
 
     private MovieInfoHolder movieInfoHolder;
     private ArrayList<TrailerInfoHolder> mActivityTrailer;
+    @SuppressWarnings("FieldCanBeLocal")
     private GetMovieInfoTask task;
 
     //Layouts for the trailers
@@ -47,6 +50,8 @@ public class DetailActivity extends AppCompatActivity {
 
     private int mNumberOfTrailers;
     private boolean instanceStateLoaded = false;
+
+    private static final int GET_MOVIE_LENGTH = 1;
 
 
     @Override
@@ -75,7 +80,18 @@ public class DetailActivity extends AppCompatActivity {
 
         MovieReviewsTask reviewTask = new MovieReviewsTask(this);
         reviewTask.execute(movieInfoHolder.getMovieId());
+        getMovieLength();
 
+    }
+
+    private void getMovieLength() {
+        android.support.v4.app.LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<String> loader = loaderManager.getLoader(GET_MOVIE_LENGTH);
+        if (loader == null){
+            loaderManager.initLoader(GET_MOVIE_LENGTH, null, movieLengthLoader);
+        }else{
+            loaderManager.restartLoader(GET_MOVIE_LENGTH, null, movieLengthLoader);
+        }
     }
 
     //Set the AsyncTask Activity
@@ -88,51 +104,39 @@ public class DetailActivity extends AppCompatActivity {
         if (!instanceStateLoaded) {
             movieInfoHolder = new MovieInfoHolder();
         }
-        movieInfoHolder.setMovieId(intent.getIntExtra("movieId", -1));
-        movieInfoHolder.setMoviePoster(intent.getStringExtra("moviePoster"));
-        movieInfoHolder.setMovieTitle(intent.getStringExtra("movieTitle"));
-        movieInfoHolder.setMovieReleaseDate(intent.getStringExtra("movieRelease"));
-        movieInfoHolder.setMovieLength(intent.getIntExtra("movieLength", 0));
-        movieInfoHolder.setMovieRating(intent.getStringExtra("movieRating"));
-        movieInfoHolder.setMovieDescription(intent.getStringExtra("movieDescription"));
-
-        if (!instanceStateLoaded){
-        movieInfoHolder.setFavorite(intent.getBooleanExtra("movieFavorite", false ));
-         }
-        movieInfoHolder.setColumn(intent.getLongExtra("movieColumn", -1));
-        movieInfoHolder.setListDescription(intent.getStringExtra("movieType"));
-
+        movieInfoHolder = intent.getParcelableExtra("movie");
         setupLayout();
     }
 
+    @SuppressLint("SetTextI18n")
     private void setupLayout() {
         //Set Movie Poster
-        ImageView posterImage = (ImageView) findViewById(R.id.poster_image);
+        ImageView posterImage = findViewById(R.id.poster_image);
         Picasso.with(DetailActivity.this).load(UriBuilderUtil.imageDownload(movieInfoHolder.getMoviePoster()))
                 .into(posterImage);
         //Set Movie Title
-        TextView movieTitle = (TextView) findViewById(R.id.movie_title);
+        TextView movieTitle = findViewById(R.id.movie_title);
         movieTitle.setText(movieInfoHolder.getMovieTitle());
 
         //Set Release Date
-        TextView movieReleaseDate = (TextView) findViewById(R.id.release_date);
+        TextView movieReleaseDate = findViewById(R.id.release_date);
         String dateReleased = movieInfoHolder.getMovieReleaseDate();
         String extractYear = dateReleased.substring(0, 4);
         movieReleaseDate.setText(extractYear);
 
         //Set movie rating
-        TextView movieRating = (TextView) findViewById(R.id.user_rating);
+        TextView movieRating = findViewById(R.id.user_rating);
         movieRating.setText(movieInfoHolder.getMovieRating() + "/10");
         movieRating.setTypeface(null, Typeface.BOLD_ITALIC);
 
         //Set Movie Description
-        TextView movieDescription = (TextView) findViewById(R.id.movieDescription);
+        TextView movieDescription = findViewById(R.id.movieDescription);
         movieDescription.setText(movieInfoHolder.getMovieDescription());
 
         //Sets ImageViews' onClick attributes
-        final ImageView favorite = (ImageView) findViewById(R.id.favorite);
+        final ImageView favorite = findViewById(R.id.favorite);
         favorite.setClickable(true);
-        final ImageView notFavorite = (ImageView) findViewById(R.id.not_favorite);
+        final ImageView notFavorite = findViewById(R.id.not_favorite);
         notFavorite.setClickable(true);
         //initiate the LinearLayouts
         layout1 = findViewById(R.id.trailer1_layout);
@@ -232,7 +236,6 @@ public class DetailActivity extends AppCompatActivity {
      */
     private void setAsFavorite() {
         //The Content that goes into the databse.
-        int idf = movieInfoHolder.getMovieId();
         ContentValues values = new ContentValues();
         values.put(Contract.MovieEntry.COLUMN_MOVIE_TITLE, movieInfoHolder.getMovieTitle());
         values.put(Contract.MovieEntry.COLUMN_MOVIE_ID, movieInfoHolder.getMovieId());
@@ -289,6 +292,7 @@ public class DetailActivity extends AppCompatActivity {
         getContentResolver().delete(uri, null, null);
     }
 
+    @SuppressLint("StaticFieldLeak")
     class GetMovieInfoTask extends AsyncTask<Integer, Void, String>{
 
         ArrayList<TrailerInfoHolder> trailersForMovies = new ArrayList<>();
@@ -308,6 +312,7 @@ public class DetailActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
 
+            @SuppressWarnings("UnnecessaryLocalVariable")
             String trailerJsonString = s;
 
             try {
@@ -320,5 +325,24 @@ public class DetailActivity extends AppCompatActivity {
             setTrailerLayout();
         }
     }
+    //Loader to get the movie length.
+    android.support.v4.app.LoaderManager.LoaderCallbacks<String> movieLengthLoader =
+            new android.support.v4.app.LoaderManager.LoaderCallbacks<String>() {
+                @Override
+                public Loader<String> onCreateLoader(int id, Bundle args) {
+                    return new GetMovieDetailLoader(DetailActivity.this, movieInfoHolder.getMovieId());
+                }
+
+                @Override
+                public void onLoadFinished(Loader<String> loader, String data) {
+                TextView textView = findViewById(R.id.movie_length);
+                textView.setText(getString(R.string.minutes_text, data));
+                }
+
+                @Override
+                public void onLoaderReset(Loader<String> loader) {
+
+                }
+            };
 
 }

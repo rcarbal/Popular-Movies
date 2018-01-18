@@ -4,7 +4,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URL;
 import java.util.ArrayList;
 
 
@@ -25,7 +24,7 @@ public class JsonUtils {
 
             JSONObject object = resultsInData.getJSONObject(i);
             if (object != null) {
-                int movieId = (int) object.getInt("id");
+                int movieId = object.getInt("id");
                 String moviePoster = (String) object.get("poster_path");
                 String movieTitle = (String) object.get("title");
                 String releaseDate = (String) object.get("release_date");
@@ -46,6 +45,7 @@ public class JsonUtils {
                 movieInfo.setColumn(0);
                 movieInfo.setListDescription(listType);
 
+                movieInfo.setMovieLength(-2);
                 movieArray.add(i, movieInfo);
 
             }
@@ -105,6 +105,16 @@ public class JsonUtils {
             }
         }
         return arrayListOfReviews;
+    }
+
+    //Parses for movie deatils
+    public static int parseMovieDetails(String jsonString) throws JSONException{
+
+        JSONObject jsonData = new JSONObject(jsonString);
+        @SuppressWarnings("UnnecessaryLocalVariable")
+        int movieLength = jsonData.getInt("runtime");
+
+        return movieLength;
     }
 
 }

@@ -1,12 +1,12 @@
 package com.example.rcarb.popularmovies;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.graphics.Movie;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,7 +19,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.example.rcarb.popularmovies.Data.Contract;
-import com.example.rcarb.popularmovies.Data.FavoriteMovieDbHelper;
 import com.example.rcarb.popularmovies.Utils.JsonUtils;
 import com.example.rcarb.popularmovies.Utils.MovieInfoHolder;
 import com.example.rcarb.popularmovies.Utils.NetWorkUtils;
@@ -32,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
+@SuppressWarnings({"ConstantConditions", "StatementWithEmptyBody", "UnusedAssignment"})
 public class MainActivity extends AppCompatActivity
         implements GridViewAdapter.OnItemClicked {
 
@@ -49,11 +49,26 @@ public class MainActivity extends AppCompatActivity
     private String stateOfActivity = "";
     private boolean favoriteState = false;
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("favorite",favoriteState);
+        outState.putString("stateOfActivity", stateOfActivity);
+        outState.putParcelableArrayList("movie_array", mCurrentMovies);
+        outState.putStringArray("string_array", mMoviesArray);
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (savedInstanceState!=null){
+            stateOfActivity = savedInstanceState.getString("stateOfActivity");
+            favoriteState = savedInstanceState.getBoolean("favorite");
+            mCurrentMovies = savedInstanceState.getParcelableArrayList("movie_array");
+            mMoviesArray= savedInstanceState.getStringArray("string_array");
+
+        }
 
         if (checkDataBaseExists()) {
             checkCursorData();
@@ -62,7 +77,7 @@ public class MainActivity extends AppCompatActivity
         mContext = MainActivity.this;
 
         //initialize the RecyclerView
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        mRecyclerView = findViewById(R.id.recycler_view);
         //The Grid will not change size
         mRecyclerView.setHasFixedSize(true);
 
@@ -76,7 +91,15 @@ public class MainActivity extends AppCompatActivity
         task = new FetchMovieTask(mContext, mRecyclerView);
 
         //The Default param is to query for most popular.
-        task.execute("initial");
+        if (stateOfActivity.equals("")) {
+            task.execute("initial");
+        }else if (stateOfActivity.equals("popular")){
+            task.execute("popular");
+        }else if (stateOfActivity.equals("top_rated")){
+            task.execute("top_rated");
+        } else if (stateOfActivity!=null && favoriteState){
+            task.execute("favorites");
+        }
     }
 
     @Override
@@ -197,33 +220,14 @@ public class MainActivity extends AppCompatActivity
 
         //Pass throught the MovieHolder object
         MovieInfoHolder holder = mCurrentMovies.get(getIndexOfCurrentMovies(movieId));
-        intent.putExtra("movieId", holder.getMovieId());
-        intent.putExtra("moviePoster", holder.getMoviePoster());
-        intent.putExtra("movieTitle", holder.getMovieTitle());
-        intent.putExtra("movieRelease", holder.getMovieReleaseDate());
-        intent.putExtra("movieLength", 0);
-        intent.putExtra("movieRating", holder.getMovieRating());
-        intent.putExtra("movieDescription", holder.getMovieDescription());
         long id = getMovieIdColumn(movieId);
-        if (id == -1) {
-            intent.putExtra("movieFavorite", holder.getFavorite());
-            intent.putExtra("movieColumn", holder.getColumn());
-            //intent.putExtra("movieFavorite", true);
-            //intent.putExtra("movieColumn", id);
-        } else {
-            intent.putExtra("movieFavorite", true);
-            intent.putExtra("movieColumn", id);
+        if (id == -1){
+
+        }else{
+            holder.setFavorite(true);
+            holder.setColumn(id);
         }
-        intent.putExtra("movieType", holder.getListDescrition());
-
-//        if (getMovieId(holder.getMovieTitle())== -1){
-
-//        }else{
-//            intent.putExtra("movieFavorite", true);
-//            intent.putExtra("movieColumn", getMovieId(holder.getMovieTitle()));
-//        }
-
-
+        intent.putExtra("movie", holder);
         startActivity(intent);
     }
 
@@ -278,15 +282,8 @@ public class MainActivity extends AppCompatActivity
         return movieArray;
     }
 
-
-    //Checks to see if arraylist object has data.
-    private boolean checkMovieArrays(ArrayList<MovieInfoHolder> movieArrays) {
-        if (movieArrays.size() < 0) {
-            return true;
-        }
-        return false;
-    }
-
+    @SuppressWarnings({"unused", "ConstantConditions"})
+    @SuppressLint("StaticFieldLeak")
     class FetchMovieTask extends AsyncTask<String, Void, String[]> {
 
         final Context mContext;

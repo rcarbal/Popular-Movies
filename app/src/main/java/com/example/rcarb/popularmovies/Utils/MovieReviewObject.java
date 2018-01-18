@@ -1,8 +1,5 @@
 package com.example.rcarb.popularmovies.Utils;
 
-/**
- * Created by rcarb on 11/27/2017.
- */
 
 public class MovieReviewObject {
     private String mAuthorName;
