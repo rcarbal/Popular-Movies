@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:background="@color/background"
     tools:context="com.example.rcarb.popularmovies.MainActivity"
+    android:id="@+id/mainactivity_frameLayout"
     tools:ignore="Overdraw">
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"

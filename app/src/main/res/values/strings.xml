@@ -23,4 +23,8 @@
 
     <string name="ph_text" translatable="false">no movie length</string>
     <string name="minutes_text" >%1$s mins</string>
+
+    //String for the snackBar
+    <string name="retry_text" translatable="false">No Internet Connection</string>
+    <string name="hit_retry" >Retry</string>
 </resources>

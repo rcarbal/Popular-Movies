@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.design.widget.BaseTransientBottomBar;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,8 +18,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.rcarb.popularmovies.Data.CheckConnectionLoader;
 import com.example.rcarb.popularmovies.Data.Contract;
 import com.example.rcarb.popularmovies.Data.GetMovieDetailLoader;
+import com.example.rcarb.popularmovies.Utils.CheckNetworkConnection;
 import com.example.rcarb.popularmovies.Utils.JsonUtils;
 import com.example.rcarb.popularmovies.Utils.MovieInfoHolder;
 import com.example.rcarb.popularmovies.Utils.MovieReviewsTask;
@@ -38,6 +42,7 @@ public class DetailActivity extends AppCompatActivity {
     private ArrayList<TrailerInfoHolder> mActivityTrailer;
     @SuppressWarnings("FieldCanBeLocal")
     private GetMovieInfoTask task;
+    int currentMovieId;
 
     //Layouts for the trailers
     private LinearLayout layout1;
@@ -74,13 +79,22 @@ public class DetailActivity extends AppCompatActivity {
         getActivityIntent();
         setupLayout();
 
-        int currentMovieId= movieInfoHolder.getMovieId();
-        task = new GetMovieInfoTask();
-        task.execute(currentMovieId);
+        currentMovieId= movieInfoHolder.getMovieId();
+        getMovieReviewAndLength();
 
-        MovieReviewsTask reviewTask = new MovieReviewsTask(this);
-        reviewTask.execute(movieInfoHolder.getMovieId());
-        getMovieLength();
+    }
+
+    private void getMovieReviewAndLength(){
+        if (!CheckNetworkConnection.checkConnection(this)){
+            showSnackBar();
+        }else {
+            task = new GetMovieInfoTask();
+            task.execute(currentMovieId);
+
+            MovieReviewsTask reviewTask = new MovieReviewsTask(this);
+            reviewTask.execute(movieInfoHolder.getMovieId());
+            getMovieLength();
+        }
 
     }
 
@@ -269,7 +283,7 @@ public class DetailActivity extends AppCompatActivity {
     }
 
 
-//    Sets the number of trailers to the gloaba varaible.
+//    Sets the number of trailers to the global variable.
     private void setNumberOfTrailers(){
         if (mActivityTrailer.size() <= 3 && mActivityTrailer.size() > 0) {
             mNumberOfTrailers = mActivityTrailer.size();
@@ -288,8 +302,15 @@ public class DetailActivity extends AppCompatActivity {
         String stringId = Long.toString(id);
         Uri uri = Contract.MovieEntry.BASE_CONTENT_URI_FAVORITES;
         uri = uri.buildUpon().appendPath(stringId).build();
-
         getContentResolver().delete(uri, null, null);
+    }
+
+    private void showSnackBar() {
+        Snackbar snackbar = Snackbar
+                .make(findViewById(android.R.id.content),
+                        R.string.retry_text, BaseTransientBottomBar.LENGTH_INDEFINITE);
+        snackbar.setAction(R.string.hit_retry, new SnackListener());
+        snackbar.show();
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -344,5 +365,14 @@ public class DetailActivity extends AppCompatActivity {
 
                 }
             };
+
+    //Object to use as the snackbar's listener.
+    public class SnackListener implements View.OnClickListener{
+
+        @Override
+        public void onClick(View view) {
+            getMovieReviewAndLength();
+        }
+    }
 
 }

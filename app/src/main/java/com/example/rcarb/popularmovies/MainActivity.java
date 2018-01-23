@@ -8,6 +8,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
+import android.support.design.widget.BaseTransientBottomBar;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -16,9 +20,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
+import com.example.rcarb.popularmovies.Data.CheckConnectionLoader;
 import com.example.rcarb.popularmovies.Data.Contract;
+import com.example.rcarb.popularmovies.Utils.CheckNetworkConnection;
 import com.example.rcarb.popularmovies.Utils.JsonUtils;
 import com.example.rcarb.popularmovies.Utils.MovieInfoHolder;
 import com.example.rcarb.popularmovies.Utils.NetWorkUtils;
@@ -27,7 +34,6 @@ import com.example.rcarb.popularmovies.Utils.UriBuilderUtil;
 import org.json.JSONException;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 
 
@@ -35,6 +41,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity
         implements GridViewAdapter.OnItemClicked {
 
+    private final static int CHECK_CONNECTION = 1;
     private static final String DB_FULL_PATH = "/data/data/com.example.rcarb.popularmovies/databases/FavoriteMovies.db";
 
     private RecyclerView mRecyclerView;
@@ -51,7 +58,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean("favorite",favoriteState);
+        outState.putBoolean("favorite", favoriteState);
         outState.putString("stateOfActivity", stateOfActivity);
         outState.putParcelableArrayList("movie_array", mCurrentMovies);
         outState.putStringArray("string_array", mMoviesArray);
@@ -62,11 +69,11 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState!=null){
+        if (savedInstanceState != null) {
             stateOfActivity = savedInstanceState.getString("stateOfActivity");
             favoriteState = savedInstanceState.getBoolean("favorite");
             mCurrentMovies = savedInstanceState.getParcelableArrayList("movie_array");
-            mMoviesArray= savedInstanceState.getStringArray("string_array");
+            mMoviesArray = savedInstanceState.getStringArray("string_array");
 
         }
 
@@ -89,17 +96,8 @@ public class MainActivity extends AppCompatActivity
 
 
         task = new FetchMovieTask(mContext, mRecyclerView);
+        callNetwork();
 
-        //The Default param is to query for most popular.
-        if (stateOfActivity.equals("")) {
-            task.execute("initial");
-        }else if (stateOfActivity.equals("popular")){
-            task.execute("popular");
-        }else if (stateOfActivity.equals("top_rated")){
-            task.execute("top_rated");
-        } else if (stateOfActivity!=null && favoriteState){
-            task.execute("favorites");
-        }
     }
 
     @Override
@@ -133,6 +131,18 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    private void callNetwork() {
+        if (stateOfActivity.equals("")) {
+            task.execute("initial");
+        } else if (stateOfActivity.equals("popular")) {
+            task.execute("popular");
+        } else if (stateOfActivity.equals("top_rated")) {
+            task.execute("top_rated");
+        } else if (stateOfActivity != null && favoriteState) {
+            task.execute("favorites");
+        }
+    }
+
 
     //Checks to see if a contract already exists
     private boolean checkDataBaseExists() {
@@ -142,16 +152,14 @@ public class MainActivity extends AppCompatActivity
                     SQLiteDatabase.OPEN_READONLY);
             checkDB.close();
         } catch (SQLiteException e) {
-            Toast.makeText(this, "Database does not exist", Toast.LENGTH_SHORT).show();
             return false;
         }
-        Toast.makeText(this, "Databse does exist", Toast.LENGTH_SHORT).show();
         return true;
     }
 
     //Reads the databse of favorite movies
     private Cursor getAllFavoriteMovies() {
-        Cursor cursor ;
+        Cursor cursor;
         cursor = getContentResolver().query(Contract.MovieEntry.BASE_CONTENT_URI_FAVORITES,
                 null,
                 null,
@@ -221,9 +229,9 @@ public class MainActivity extends AppCompatActivity
         //Pass throught the MovieHolder object
         MovieInfoHolder holder = mCurrentMovies.get(getIndexOfCurrentMovies(movieId));
         long id = getMovieIdColumn(movieId);
-        if (id == -1){
+        if (id == -1) {
 
-        }else{
+        } else {
             holder.setFavorite(true);
             holder.setColumn(id);
         }
@@ -282,6 +290,14 @@ public class MainActivity extends AppCompatActivity
         return movieArray;
     }
 
+    private void showSnackBar() {
+        Snackbar snackbar = Snackbar
+                .make(findViewById(android.R.id.content),
+                        R.string.retry_text, BaseTransientBottomBar.LENGTH_INDEFINITE);
+        snackbar.setAction(R.string.hit_retry, new SnackListener());
+        snackbar.show();
+    }
+
     @SuppressWarnings({"unused", "ConstantConditions"})
     @SuppressLint("StaticFieldLeak")
     class FetchMovieTask extends AsyncTask<String, Void, String[]> {
@@ -300,12 +316,16 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         protected String[] doInBackground(String... params) {
-
+            Boolean isConnected = CheckNetworkConnection.checkConnection(MainActivity.this);
             String[] movieParsed = new String[2];
 
 
             if (params[0].equals("initial")) {
                 stateOfActivity = "popular";
+
+                if (!isConnected) {
+                    cancel(true);
+                }
 
                 try {
                     String jsonDataPopular = NetWorkUtils.getResponseFromHttpUrl(UriBuilderUtil.buildPopularUri());
@@ -325,6 +345,9 @@ public class MainActivity extends AppCompatActivity
 
 
             if (params[0].equals("popular")) {
+                if (!isConnected) {
+                    cancel(true);
+                }
 
                 stateOfActivity = params[0];
                 movieParsed = mMoviesArray;
@@ -332,6 +355,9 @@ public class MainActivity extends AppCompatActivity
             }
 
             if (params[0].equals("top_rated")) {
+                if (!isConnected) {
+                    cancel(true);
+                }
                 stateOfActivity = params[0];
                 movieParsed = mMoviesArray;
                 return movieParsed;
@@ -339,6 +365,9 @@ public class MainActivity extends AppCompatActivity
             }
 
             if (params[0].equals("favorites")) {
+                if (!isConnected) {
+                    cancel(true);
+                }
                 favoriteState = true;
                 movieParsed = null;
             }
@@ -392,9 +421,18 @@ public class MainActivity extends AppCompatActivity
                     mActivitiesRecyclerView.setAdapter(adapter);
                 } else if (!checkCursorData()) {
                     favoriteState = false;
-                    cancel(true);
+                    task.cancel(true);
                 }
             }
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            if (isCancelled()){
+                showSnackBar();
+            }
+
         }
     }
 
@@ -425,6 +463,36 @@ public class MainActivity extends AppCompatActivity
             task.execute("favorites");
         }
 
+    }//Loader used to check for network connection.
+
+    private final LoaderManager.LoaderCallbacks checkConnection =
+            new LoaderManager.LoaderCallbacks<Boolean>() {
+                @Override
+                public Loader<Boolean> onCreateLoader(int id, Bundle args) {
+                    return new CheckConnectionLoader(MainActivity.this);
+                }
+
+                @Override
+                public void onLoadFinished(Loader<Boolean> loader, Boolean data) {
+
+                }
+
+                @Override
+                public void onLoaderReset(Loader<Boolean> loader) {
+
+                }
+            };
+
+    //Object to use as the snackbar's listener.
+    public class SnackListener implements View.OnClickListener{
+
+        @Override
+        public void onClick(View view) {
+            task = new FetchMovieTask(mContext, mRecyclerView);
+            stateOfActivity = "";
+            callNetwork();
+
+        }
     }
 }
 
