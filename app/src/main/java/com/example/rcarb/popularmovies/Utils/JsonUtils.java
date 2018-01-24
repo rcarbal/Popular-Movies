@@ -68,10 +68,12 @@ public class JsonUtils {
 
                 //Extract the movie key
                 String movieKey = object.getString("key");
+                String trailerName = object.getString("name");
 
                 //add the movie key to the array object
                 TrailerInfoHolder trailerKeyHolder = new TrailerInfoHolder();
                 trailerKeyHolder.setTrailerKey(movieKey);
+                trailerKeyHolder.setTrailerName(trailerName);
                 trailerArray.add(trailerKeyHolder);
 
             }

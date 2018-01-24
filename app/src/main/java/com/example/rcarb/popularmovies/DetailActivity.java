@@ -12,13 +12,13 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.rcarb.popularmovies.Data.CheckConnectionLoader;
 import com.example.rcarb.popularmovies.Data.Contract;
 import com.example.rcarb.popularmovies.Data.GetMovieDetailLoader;
 import com.example.rcarb.popularmovies.Utils.CheckNetworkConnection;
@@ -36,25 +36,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 @SuppressWarnings({"WeakerAccess", "CanBeFinal"})
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity implements
+        MovieTrailerAdaptor.TrailerOnClickListener {
 
     private MovieInfoHolder movieInfoHolder;
     private ArrayList<TrailerInfoHolder> mActivityTrailer;
     @SuppressWarnings("FieldCanBeLocal")
     private GetMovieInfoTask task;
     int currentMovieId;
-
-    //Layouts for the trailers
-    private LinearLayout layout1;
-    private LinearLayout layout2;
-    private LinearLayout layout3;
-
-    private View view1;
-    private View view2;
-    private View view3;
-
-    private int mNumberOfTrailers;
     private boolean instanceStateLoaded = false;
+    RecyclerView mRecyclerView;
 
     private static final int GET_MOVIE_LENGTH = 1;
 
@@ -70,29 +61,25 @@ public class DetailActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(savedInstanceState != null){
+
+        if (savedInstanceState != null) {
             movieInfoHolder = new MovieInfoHolder();
             movieInfoHolder.setFavorite(savedInstanceState.getBoolean("FAVORITE_STATE"));
             instanceStateLoaded = true;
         }
         setContentView(R.layout.activity_detail);
+        mRecyclerView = findViewById(R.id.rv_trailers);
+        mRecyclerView.setVisibility(View.GONE);
         getActivityIntent();
         setupLayout();
-
-        currentMovieId= movieInfoHolder.getMovieId();
         getMovieReviewAndLength();
 
     }
 
-    private void getMovieReviewAndLength(){
-        if (!CheckNetworkConnection.checkConnection(this)){
+    private void getMovieReviewAndLength() {
+        if (!CheckNetworkConnection.checkConnection(this)) {
             showSnackBar();
-        }else {
-            task = new GetMovieInfoTask();
-            task.execute(currentMovieId);
-
-            MovieReviewsTask reviewTask = new MovieReviewsTask(this);
-            reviewTask.execute(movieInfoHolder.getMovieId());
+        } else {
             getMovieLength();
         }
 
@@ -101,15 +88,34 @@ public class DetailActivity extends AppCompatActivity {
     private void getMovieLength() {
         android.support.v4.app.LoaderManager loaderManager = getSupportLoaderManager();
         Loader<String> loader = loaderManager.getLoader(GET_MOVIE_LENGTH);
-        if (loader == null){
+        if (loader == null) {
             loaderManager.initLoader(GET_MOVIE_LENGTH, null, movieLengthLoader);
-        }else{
+        } else {
             loaderManager.restartLoader(GET_MOVIE_LENGTH, null, movieLengthLoader);
         }
     }
 
-    //Set the AsyncTask Activity
+    private void setupTrailerRecyclerView() {;
+        mRecyclerView.setHasFixedSize(true);
+        //LinearLayout manager
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
+        if (mActivityTrailer.size() > 0) {
+            int size = mActivityTrailer.size();
+            RecyclerView.Adapter mAdaptor = new MovieTrailerAdaptor(size,
+                    mActivityTrailer,
+                    this);
+            mRecyclerView.setNestedScrollingEnabled(false);
+            mRecyclerView.setAdapter(mAdaptor);
+            mRecyclerView.setVisibility(View.VISIBLE);
+
+            MovieReviewsTask reviewTask = new MovieReviewsTask(this);
+            reviewTask.execute(movieInfoHolder.getMovieId());
+        }
+    }
+
+    //Set the AsyncTask Activity
 
 
     //Gets the intent extras and sets up a MovieInfoHolder object.
@@ -152,29 +158,6 @@ public class DetailActivity extends AppCompatActivity {
         favorite.setClickable(true);
         final ImageView notFavorite = findViewById(R.id.not_favorite);
         notFavorite.setClickable(true);
-        //initiate the LinearLayouts
-        layout1 = findViewById(R.id.trailer1_layout);
-        layout1.setVisibility(View.GONE);
-        view1 = findViewById(R.id.view1);
-        view1.setVisibility(View.GONE);
-
-        layout2 = findViewById(R.id.trailer2_layout);
-        layout2.setVisibility(View.GONE);
-        view2 = findViewById(R.id.view2);
-        view2.setVisibility(View.GONE);
-
-        layout3 = findViewById(R.id.trailer3_layout);
-        layout3.setVisibility(View.GONE);
-        view3 = findViewById(R.id.view3);
-        view3.setVisibility(View.GONE);
-
-        //set the click for the play button
-        ImageView play1 = findViewById(R.id.trailer1_button);
-        play1.setClickable(true);
-        ImageView play2 = findViewById(R.id.trailer2_button);
-        play2.setClickable(true);
-        ImageView play3 = findViewById(R.id.trailer3_button);
-        play3.setClickable(true);
 
 
         if (movieInfoHolder.getFavorite()) {
@@ -212,37 +195,7 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
 
-        play1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String trailerKey = mActivityTrailer.get(0).getTrailerKey();
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(UriBuilderUtil.buildTrailerUri(trailerKey));
-                startActivity(intent);
-
-            }
-        });
-        play2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String trailerKey = mActivityTrailer.get(1).getTrailerKey();
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(UriBuilderUtil.buildTrailerUri(trailerKey));
-                startActivity(intent);
-
-            }
-        });
-        play3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String trailerKey = mActivityTrailer.get(2).getTrailerKey();
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(UriBuilderUtil.buildTrailerUri(trailerKey));
-                startActivity(intent);
-
-            }
-        });
-
+        currentMovieId = movieInfoHolder.getMovieId();
     }
 
     /**
@@ -258,38 +211,7 @@ public class DetailActivity extends AppCompatActivity {
         values.put(Contract.MovieEntry.COLUMN_MOVIE_RATING, movieInfoHolder.getMovieRating());
         values.put(Contract.MovieEntry.COLUMN_MOVIE_DESCRIPTION, movieInfoHolder.getMovieDescription());
 
-        getContentResolver().insert(Contract.MovieEntry.BASE_CONTENT_URI_FAVORITES,values);
-    }
-
-    //Sets the TrailerLayout
-    private void setTrailerLayout(){
-        if (mNumberOfTrailers > 0){
-            for (int i = 0; i <= mNumberOfTrailers; i++){
-                if (i == 1){
-                    layout1.setVisibility(View.VISIBLE);
-                    view1.setVisibility(View.VISIBLE);
-                }
-                else if (i == 2){
-                    layout2.setVisibility(View.VISIBLE);
-                    view2.setVisibility(View.VISIBLE);
-                }
-                else if (i == 3){
-                    layout3.setVisibility(View.VISIBLE);
-                    view3.setVisibility(View.VISIBLE);
-                }
-
-            }
-        }
-    }
-
-
-//    Sets the number of trailers to the global variable.
-    private void setNumberOfTrailers(){
-        if (mActivityTrailer.size() <= 3 && mActivityTrailer.size() > 0) {
-            mNumberOfTrailers = mActivityTrailer.size();
-        } else if (mActivityTrailer.size() > 3) {
-            mNumberOfTrailers = 3;
-        }
+        getContentResolver().insert(Contract.MovieEntry.BASE_CONTENT_URI_FAVORITES, values);
     }
 
 
@@ -313,39 +235,45 @@ public class DetailActivity extends AppCompatActivity {
         snackbar.show();
     }
 
+
+    @Override
+    public void onClickTrailer(String movieKey) {
+        String trailerKey = movieKey;
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(UriBuilderUtil.buildTrailerUri(trailerKey));
+        startActivity(intent);
+    }
+
     @SuppressLint("StaticFieldLeak")
-    class GetMovieInfoTask extends AsyncTask<Integer, Void, String>{
+    class GetMovieInfoTask extends AsyncTask<Integer, Void, Void> {
 
         ArrayList<TrailerInfoHolder> trailersForMovies = new ArrayList<>();
 
         @Override
-        protected String doInBackground(Integer... integers) {
+        protected Void doInBackground(Integer... integers) {
             String jsonDataTrailers = "";
             try {
                 jsonDataTrailers = NetWorkUtils.getResponseFromHttpUrl(UriBuilderUtil.buildParsingTrailerUri(integers[0]));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return jsonDataTrailers;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-
-            @SuppressWarnings("UnnecessaryLocalVariable")
-            String trailerJsonString = s;
-
             try {
-                trailersForMovies = JsonUtils.parseJsonTrailerObject(trailerJsonString);
+                trailersForMovies = JsonUtils.parseJsonTrailerObject(jsonDataTrailers);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
             mActivityTrailer = trailersForMovies;
-            setNumberOfTrailers();
-            setTrailerLayout();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            setupTrailerRecyclerView();
         }
     }
+
     //Loader to get the movie length.
     android.support.v4.app.LoaderManager.LoaderCallbacks<String> movieLengthLoader =
             new android.support.v4.app.LoaderManager.LoaderCallbacks<String>() {
@@ -356,18 +284,22 @@ public class DetailActivity extends AppCompatActivity {
 
                 @Override
                 public void onLoadFinished(Loader<String> loader, String data) {
-                TextView textView = findViewById(R.id.movie_length);
-                textView.setText(getString(R.string.minutes_text, data));
+                    TextView textView = findViewById(R.id.movie_length);
+                    textView.setText(getString(R.string.minutes_text, data));
+
+                    task = new GetMovieInfoTask();
+                    task.execute(currentMovieId);
+
                 }
 
                 @Override
                 public void onLoaderReset(Loader<String> loader) {
-
                 }
             };
 
+
     //Object to use as the snackbar's listener.
-    public class SnackListener implements View.OnClickListener{
+    public class SnackListener implements View.OnClickListener {
 
         @Override
         public void onClick(View view) {
@@ -375,4 +307,9 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 }

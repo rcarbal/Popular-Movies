@@ -15,9 +15,7 @@
     <string name="not_filled">star is not filled</string>
     <string name="is_filled">star is filled</string>
     <string name="trailer_section">Trailers:</string>
-    <string name="trailer_label1">Trailer 1</string>
-    <string name="trailer_label2">Trailer 2</string>
-    <string name="trailer_label3">Trailer 3</string>
+    <string name="trailer_label1">Trailer </string>
     <string name="review_label">Reviews</string>
     <string name="max_rating" translatable="false"> 10</string>
 
