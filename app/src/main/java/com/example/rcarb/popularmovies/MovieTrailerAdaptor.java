@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.example.rcarb.popularmovies.Utils.TrailerInfoHolder;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by rcarb on 1/22/2018.
@@ -18,18 +19,15 @@ import java.util.ArrayList;
 
 public class MovieTrailerAdaptor extends RecyclerView.Adapter<MovieTrailerAdaptor.TrailerViewHolder> {
 
-    private final int sizeOfData;
-    private final ArrayList<TrailerInfoHolder> mTrailers;
+    private final List<TrailerInfoHolder> mTrailers;
     private final TrailerOnClickListener mOnclicked;
 
     public interface TrailerOnClickListener {
         void onClickTrailer(String movieKey);
     }
 
-    public MovieTrailerAdaptor(int sizeOfData,
-                               ArrayList<TrailerInfoHolder> trailers,
+    public MovieTrailerAdaptor(List<TrailerInfoHolder> trailers,
                                TrailerOnClickListener listener) {
-        this.sizeOfData = sizeOfData;
         mTrailers = trailers;
         mOnclicked = listener;
     }
@@ -56,7 +54,7 @@ public class MovieTrailerAdaptor extends RecyclerView.Adapter<MovieTrailerAdapto
 
     @Override
     public int getItemCount() {
-        return sizeOfData;
+        return mTrailers.size();
     }
 
     class TrailerViewHolder extends RecyclerView.ViewHolder

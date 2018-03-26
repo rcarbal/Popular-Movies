@@ -34,6 +34,7 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings({"WeakerAccess", "CanBeFinal"})
 public class DetailActivity extends AppCompatActivity implements
@@ -62,17 +63,19 @@ public class DetailActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-            movieInfoHolder = new MovieInfoHolder();
-            movieInfoHolder.setFavorite(savedInstanceState.getBoolean("FAVORITE_STATE"));
-            instanceStateLoaded = true;
-        }
         setContentView(R.layout.activity_detail);
-        mRecyclerView = findViewById(R.id.rv_trailers);
-        mRecyclerView.setVisibility(View.GONE);
+
+//        if (savedInstanceState != null) {
+//            movieInfoHolder = new MovieInfoHolder();
+//            movieInfoHolder.setFavorite(savedInstanceState.getBoolean("FAVORITE_STATE"));
+//            instanceStateLoaded = true;
+//        }
+//
+
         getActivityIntent();
         setupLayout();
         getMovieReviewAndLength();
+        getMovieTrailers();
 
     }
 
@@ -95,23 +98,33 @@ public class DetailActivity extends AppCompatActivity implements
         }
     }
 
-    private void setupTrailerRecyclerView() {;
-        mRecyclerView.setHasFixedSize(true);
-        //LinearLayout manager
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+    //Get movie trailers
+    private void getMovieTrailers() {
+        task = new GetMovieInfoTask();
+        task.execute(currentMovieId);
+    }
+
+    private void setupTrailerRecyclerView() {
+
+        //Check trailer size.
+         int numberOFTrailers = mActivityTrailer.size();
+
+
 
         if (mActivityTrailer.size() > 0) {
-            int size = mActivityTrailer.size();
-            RecyclerView.Adapter mAdaptor = new MovieTrailerAdaptor(size,
-                    mActivityTrailer,
-                    this);
-            mRecyclerView.setNestedScrollingEnabled(false);
-            mRecyclerView.setAdapter(mAdaptor);
-            mRecyclerView.setVisibility(View.VISIBLE);
 
-            MovieReviewsTask reviewTask = new MovieReviewsTask(this);
-            reviewTask.execute(movieInfoHolder.getMovieId());
+            List<TrailerInfoHolder> list = mActivityTrailer;
+            mRecyclerView = findViewById(R.id.rv_trailers);
+            mRecyclerView.hasFixedSize();
+            mRecyclerView.setNestedScrollingEnabled(false);
+            RecyclerView.Adapter mAdaptor = new MovieTrailerAdaptor(list,
+                    this);
+
+            mRecyclerView.setAdapter(mAdaptor);
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+//            MovieReviewsTask reviewTask = new MovieReviewsTask(this);
+//            reviewTask.execute(movieInfoHolder.getMovieId());
         }
     }
 
@@ -125,7 +138,6 @@ public class DetailActivity extends AppCompatActivity implements
             movieInfoHolder = new MovieInfoHolder();
         }
         movieInfoHolder = intent.getParcelableExtra("movie");
-        setupLayout();
     }
 
     @SuppressLint("SetTextI18n")
@@ -269,7 +281,6 @@ public class DetailActivity extends AppCompatActivity implements
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-
             setupTrailerRecyclerView();
         }
     }
@@ -286,10 +297,6 @@ public class DetailActivity extends AppCompatActivity implements
                 public void onLoadFinished(Loader<String> loader, String data) {
                     TextView textView = findViewById(R.id.movie_length);
                     textView.setText(getString(R.string.minutes_text, data));
-
-                    task = new GetMovieInfoTask();
-                    task.execute(currentMovieId);
-
                 }
 
                 @Override

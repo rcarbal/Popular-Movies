@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setHasFixedSize(true);
 
         //Sets up the layout manager as a GridView.
-        LinearLayoutManager layoutManager = new GridLayoutManager(this, 2);
+        LinearLayoutManager layoutManager = new GridLayoutManager(this, numberOfColumns());
 
         //Attaches the adaptor
         mRecyclerView.setLayoutManager(layoutManager);
@@ -97,6 +98,25 @@ public class MainActivity extends AppCompatActivity
 
         task = new FetchMovieTask(mContext, mRecyclerView);
         callNetwork();
+
+    }
+
+    //Returns int to dynamically calculate for a layout of varied screen sizes
+    private int numberOfColumns() {
+
+        //gets the current screen specs
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+        int width = displayMetrics.widthPixels;
+        float xdpi = displayMetrics.xdpi;
+        //estimates the inches of screen width and rounds it.
+        int getInches =Math.round(width/xdpi);
+        if (getInches< 3) return 2;
+
+        //divider by which to divide the width.
+        int widthDivider = 500;
+        return width / widthDivider;
 
     }
 
