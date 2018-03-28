@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity
     private Cursor mCursor;
     private String[] mMoviesArray;
 
+
     //Database global variables
 
     private String stateOfActivity = "";

@@ -13,7 +13,7 @@ android {
 
         //Please use a valid API KEY for themoviedb.org
         //to use this app
-        buildConfigField("String", "API_KEY", API_KEY)
+//        buildConfigField("String", "API_KEY", API_KEY)
     }
     buildTypes {
         release {
