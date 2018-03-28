@@ -71,6 +71,8 @@ public class DetailActivity extends AppCompatActivity implements
     private static final int GET_MOVIE_REVIEWS = 1;
 
     private boolean mIsRestored = false;
+    private int mTrailerScrollPosition = -1;
+    private int mReviewScrollPosition = -1;
 
 
     @Override
@@ -79,11 +81,14 @@ public class DetailActivity extends AppCompatActivity implements
         outState.putBoolean(IntentConstants.FAVORITE_STATE, mMovieInfoHolder.getFavorite());
         outState.putParcelableArrayList(IntentConstants.MOVIE_ARRAYLIST, mActivityTrailer);
         outState.putBoolean(IntentConstants.INSTANCE_STATE_BOOLEAN, mInstanceStateLoaded);
+        outState.putInt(IntentConstants.TRAILER_SCROLL_POSITION, mTrailerLayoutManager.findFirstVisibleItemPosition());
+        outState.putInt(IntentConstants.REVIEW_SCROLL_POSITION, mReviewLayoutManager.findFirstVisibleItemPosition());
 
         mTrailerRecyclerVIewState = mTrailerRecyclerView.getLayoutManager().onSaveInstanceState();
         outState.putParcelable(IntentConstants.MOVIE_TRAILER_LAYOUT_MANGER, mTrailerRecyclerVIewState);
         mReviewRecyclerViewState = mReviewsRecyclerView.getLayoutManager().onSaveInstanceState();
         outState.putParcelable(IntentConstants.MOVIE_REVIEW_LAYOUT_MANAGER, mReviewRecyclerViewState);
+
         super.onSaveInstanceState(outState);
     }
 
@@ -103,6 +108,8 @@ public class DetailActivity extends AppCompatActivity implements
 
             mTrailerRecyclerVIewState = savedInstanceState.getParcelable(IntentConstants.MOVIE_TRAILER_LAYOUT_MANGER);
             mReviewRecyclerViewState = savedInstanceState.getParcelable(IntentConstants.MOVIE_REVIEW_LAYOUT_MANAGER);
+            mTrailerScrollPosition = savedInstanceState.getInt(IntentConstants.TRAILER_SCROLL_POSITION);
+            mReviewScrollPosition = savedInstanceState.getInt(IntentConstants.REVIEW_SCROLL_POSITION);
         }
 
 
@@ -112,7 +119,6 @@ public class DetailActivity extends AppCompatActivity implements
         getActivityIntent();
         getMovieReviewAndLength();
         getMovieTrailers();
-        loadMovieReviews();
 
 
     }
@@ -170,7 +176,15 @@ public class DetailActivity extends AppCompatActivity implements
 
             mTrailerRecyclerView.setAdapter(mAdaptor);
             mTrailerLayoutManager = new LinearLayoutManager(this);
+            if (mIsRestored){
+                mTrailerLayoutManager.onRestoreInstanceState(mTrailerRecyclerVIewState);
+            }
             mTrailerRecyclerView.setLayoutManager(mTrailerLayoutManager);
+            if (mTrailerScrollPosition != -1){
+                mTrailerRecyclerView.smoothScrollToPosition(mTrailerScrollPosition);
+            }
+
+            loadMovieReviews();
 
         }
     }
@@ -395,7 +409,13 @@ public class DetailActivity extends AppCompatActivity implements
                     mReviewsRecyclerView.setAdapter(mAdaptor);
 
                     mReviewLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    if (mIsRestored){
+                        mReviewLayoutManager.onRestoreInstanceState(mReviewRecyclerViewState);
+                    }
                     mReviewsRecyclerView.setLayoutManager(mReviewLayoutManager);
+                    if (mReviewScrollPosition !=-1){
+                        mReviewsRecyclerView.smoothScrollToPosition(mReviewScrollPosition);
+                    }
                 }
 
                 @Override
@@ -403,14 +423,5 @@ public class DetailActivity extends AppCompatActivity implements
                 }
             };
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mTrailerRecyclerVIewState!=null){
-            mTrailerLayoutManager.onRestoreInstanceState(mTrailerRecyclerVIewState);
-        }
-        if (mReviewRecyclerViewState !=null){
-            mReviewLayoutManager.onRestoreInstanceState(mReviewRecyclerViewState);
-        }
-    }
+
 }
