@@ -11,6 +11,7 @@
         android:layout_marginLeft="26dp"
         android:layout_marginRight="26dp"
         android:layout_marginBottom="2dp"
+        android:textSize="24sp"
         android:textStyle="bold"/>
     <TextView
         android:layout_width="wrap_content"

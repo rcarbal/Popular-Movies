@@ -8,9 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.rcarb.popularmovies.Utils.TrailerInfoHolder;
+import com.example.rcarb.popularmovies.Objects.TrailerInfoObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,14 +18,14 @@ import java.util.List;
 
 public class MovieTrailerAdaptor extends RecyclerView.Adapter<MovieTrailerAdaptor.TrailerViewHolder> {
 
-    private final List<TrailerInfoHolder> mTrailers;
+    private final List<TrailerInfoObject> mTrailers;
     private final TrailerOnClickListener mOnclicked;
 
     public interface TrailerOnClickListener {
         void onClickTrailer(String movieKey);
     }
 
-    public MovieTrailerAdaptor(List<TrailerInfoHolder> trailers,
+    public MovieTrailerAdaptor(List<TrailerInfoObject> trailers,
                                TrailerOnClickListener listener) {
         mTrailers = trailers;
         mOnclicked = listener;

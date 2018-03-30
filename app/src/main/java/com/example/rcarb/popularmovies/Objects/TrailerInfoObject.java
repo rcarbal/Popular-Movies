@@ -1,32 +1,31 @@
-package com.example.rcarb.popularmovies.Utils;
+package com.example.rcarb.popularmovies.Objects;
 
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class TrailerInfoHolder implements Parcelable {
-
+public class TrailerInfoObject implements Parcelable {
     private String mTrailerKey;
     private String mTrailerName;
 
-    public TrailerInfoHolder() {
+    public TrailerInfoObject() {
 
     }
 
-    protected TrailerInfoHolder(Parcel in) {
+    protected TrailerInfoObject(Parcel in) {
         mTrailerKey = in.readString();
         mTrailerName = in.readString();
     }
 
-    public static final Creator<TrailerInfoHolder> CREATOR = new Creator<TrailerInfoHolder>() {
+    public static final Creator<TrailerInfoObject> CREATOR = new Creator<TrailerInfoObject>() {
         @Override
-        public TrailerInfoHolder createFromParcel(Parcel in) {
-            return new TrailerInfoHolder(in);
+        public TrailerInfoObject createFromParcel(Parcel in) {
+            return new TrailerInfoObject(in);
         }
 
         @Override
-        public TrailerInfoHolder[] newArray(int size) {
-            return new TrailerInfoHolder[size];
+        public TrailerInfoObject[] newArray(int size) {
+            return new TrailerInfoObject[size];
         }
     };
 

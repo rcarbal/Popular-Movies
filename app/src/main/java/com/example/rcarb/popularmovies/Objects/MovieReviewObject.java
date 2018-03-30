@@ -1,4 +1,4 @@
-package com.example.rcarb.popularmovies.Utils;
+package com.example.rcarb.popularmovies.Objects;
 
 
 public class MovieReviewObject {
@@ -6,7 +6,7 @@ public class MovieReviewObject {
     private String mMovieReview;
 
 
-    MovieReviewObject(){
+    public MovieReviewObject(){
     }
 
     public void setAuthorName(String name){

@@ -11,8 +11,8 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        //Please use a valid API KEY for themoviedb.org
-        //to use this app
+//        Please use a valid API KEY for themoviedb.org
+//        to use this app
 //        buildConfigField("String", "API_KEY", API_KEY)
     }
     buildTypes {

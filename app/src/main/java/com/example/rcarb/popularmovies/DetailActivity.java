@@ -4,7 +4,6 @@ package com.example.rcarb.popularmovies;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Parcelable;
@@ -17,23 +16,19 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.ScrollView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.rcarb.popularmovies.Data.Contract;
 import com.example.rcarb.popularmovies.Data.GetMovieDetailLoader;
+import com.example.rcarb.popularmovies.Objects.MovieInfoDetailObject;
 import com.example.rcarb.popularmovies.Utils.CheckNetworkConnection;
 import com.example.rcarb.popularmovies.Utils.IntentConstants;
 import com.example.rcarb.popularmovies.Utils.JsonUtils;
-import com.example.rcarb.popularmovies.Utils.MovieInfoHolder;
 import com.example.rcarb.popularmovies.Utils.MovieReviewAsyncLoader;
-import com.example.rcarb.popularmovies.Utils.MovieReviewObject;
+import com.example.rcarb.popularmovies.Objects.MovieReviewObject;
 import com.example.rcarb.popularmovies.Utils.NetWorkUtils;
-import com.example.rcarb.popularmovies.Utils.TrailerInfoHolder;
+import com.example.rcarb.popularmovies.Objects.TrailerInfoObject;
 import com.example.rcarb.popularmovies.Utils.UriBuilderUtil;
-import com.squareup.picasso.Picasso;
+import com.example.rcarb.popularmovies.ViewHolders.SimpleViewHolder;
 
 import org.json.JSONException;
 
@@ -46,41 +41,35 @@ public class DetailActivity extends AppCompatActivity implements
         MovieTrailerAdaptor.TrailerOnClickListener {
 
 
-    private MovieInfoHolder mMovieInfoHolder;
-    private ArrayList<TrailerInfoHolder> mActivityTrailer;
+    private MovieInfoDetailObject mMovieInfoHolder;
+    private ArrayList<TrailerInfoObject> mMovieTrailer;
+    private ArrayList<MovieReviewObject> mMovieReviews;
+    private ArrayList<Object> mConcateData;
+    private ComplexMovieAdaptor mAdaptor;
     @SuppressWarnings("FieldCanBeLocal")
     private GetMovieInfoTask task;
     private int currentMovieId;
     private boolean mInstanceStateLoaded = false;
 
-    private Parcelable mTrailerRecyclerViewState;
-    private Parcelable mReviewRecyclerViewState;
 
-
-    private LinearLayoutManager mTrailerLayoutManager;
-    private LinearLayoutManager mReviewLayoutManager;
-
-    private RecyclerView mTrailerRecyclerView;
-    private RecyclerView mReviewsRecyclerView;
-
-    private ScrollView mScrollView;
+    private Parcelable mMovieDetailLayoutManagerState;
+    private LinearLayoutManager mMovieDetailLayoutManager;
+    private RecyclerView mMovieDetailRecyclerView;
 
     private static final int GET_MOVIE_LENGTH = 1;
     private static final int GET_MOVIE_REVIEWS = 1;
 
     private boolean mIsRestored = false;
-    private int mTrailerScrollPosition = -1;
-    private int mReviewScrollPosition = -1;
 
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mTrailerRecyclerViewState = mTrailerRecyclerView.getLayoutManager().onSaveInstanceState();
-        outState.putParcelable(IntentConstants.MOVIE_TRAILER_LAYOUT_MANGER, mTrailerRecyclerViewState);
+        mMovieDetailLayoutManagerState = mMovieDetailRecyclerView.getLayoutManager().onSaveInstanceState();
+        outState.putParcelable(IntentConstants.MOVIE_TRAILER_LAYOUT_MANGER, mMovieDetailLayoutManagerState);
+        getViewPositionOfReviews();
 
-        mReviewRecyclerViewState = mReviewsRecyclerView.getLayoutManager().onSaveInstanceState();
-        outState.putParcelable(IntentConstants.MOVIE_REVIEW_LAYOUT_MANAGER, mReviewRecyclerViewState);
+
     }
 
 
@@ -91,33 +80,43 @@ public class DetailActivity extends AppCompatActivity implements
         setContentView(R.layout.test_layout);
 
 
-        mTrailerRecyclerViewState = new Bundle();
-        mTrailerRecyclerView = findViewById(R.id.rv_trailers);
-        mTrailerLayoutManager = new LinearLayoutManager(this){
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
-        mTrailerRecyclerView.setLayoutManager(mTrailerLayoutManager);
-
-        mReviewRecyclerViewState = new Bundle();
-        mReviewsRecyclerView = findViewById(R.id.reviews_rv);
-        mReviewLayoutManager = new LinearLayoutManager(this){
-            @Override
-            public boolean canScrollVertically() {
-                return false;
-            }
-        };
-        mReviewsRecyclerView.setLayoutManager(mReviewLayoutManager);
-
-
-
+        mMovieDetailLayoutManagerState = new Bundle();
+        mMovieDetailLayoutManager = new LinearLayoutManager(this);
+        mMovieDetailRecyclerView = findViewById(R.id.setup_detail_rv);
+        mMovieDetailRecyclerView.setLayoutManager(mMovieDetailLayoutManager);
 
 
         getActivityIntent();
 //        getMovieReviewAndLength();
 //        loadMovieReviews();
+    }
+
+    private void setupAdaptorsData() {
+        mConcateData = new ArrayList<>();
+
+        if (mMovieInfoHolder != null) {
+            mConcateData.add(mMovieInfoHolder);
+        }
+        if (mMovieTrailer.size() > 0) {
+            mConcateData.addAll(mMovieTrailer);
+        }
+        mConcateData.add("hello");
+        if (mMovieReviews.size() > 0) {
+            mConcateData.addAll(mMovieReviews);
+        }
+        mAdaptor = new ComplexMovieAdaptor(mConcateData, null);
+        bindData();
+    }
+
+    private void bindData() {
+        mMovieDetailRecyclerView.setAdapter(mAdaptor);
+    }
+
+    private int getViewPositionOfReviews() {
+        RecyclerView.LayoutManager layoutManager = mMovieDetailRecyclerView.getLayoutManager();
+        LinearLayoutManager manager = (LinearLayoutManager) layoutManager;
+        int firstPosition = manager.findFirstVisibleItemPosition();
+        return firstPosition;
     }
 
     private void loadMovieReviews() {
@@ -161,16 +160,16 @@ public class DetailActivity extends AppCompatActivity implements
 
     }
 
-    private void setupTrailerRecyclerView() {
+    private void setMovieTrailers() {
 
-        if (mActivityTrailer.size() > 0) {
+        if (mMovieTrailer.size() > 0) {
 
-            List<TrailerInfoHolder> list = mActivityTrailer;
-            mTrailerRecyclerView.hasFixedSize();
+            List<TrailerInfoObject> list = mMovieTrailer;
+            mMovieDetailRecyclerView.hasFixedSize();
             RecyclerView.Adapter mAdaptor = new MovieTrailerAdaptor(list,
                     this);
 
-            mTrailerRecyclerView.setAdapter(mAdaptor);
+            //mMovieDetailRecyclerView.setAdapter(mAdaptor);
             loadMovieReviews();
 
         }
@@ -180,12 +179,12 @@ public class DetailActivity extends AppCompatActivity implements
     //Set the AsyncTask Activity
 
 
-    //Gets the intent extras and sets up a MovieInfoHolder object.
+    //Gets the intent extras and sets up a MovieInfoDetailObject object.
     private void getActivityIntent() {
-        if (!mIsRestored){
+        if (!mIsRestored) {
             Intent intent = getIntent();
             if (!mInstanceStateLoaded) {
-                mMovieInfoHolder = new MovieInfoHolder();
+                mMovieInfoHolder = new MovieInfoDetailObject();
             }
             mMovieInfoHolder = intent.getParcelableExtra("movie");
         }
@@ -260,7 +259,7 @@ public class DetailActivity extends AppCompatActivity implements
 //        });
 
         currentMovieId = mMovieInfoHolder.getMovieId();
-        getMovieTrailers();
+        getMovieLength();
     }
 
     /**
@@ -312,7 +311,7 @@ public class DetailActivity extends AppCompatActivity implements
     @SuppressLint("StaticFieldLeak")
     class GetMovieInfoTask extends AsyncTask<Integer, Void, Void> {
 
-        ArrayList<TrailerInfoHolder> trailersForMovies = new ArrayList<>();
+        ArrayList<TrailerInfoObject> trailersForMovies = new ArrayList<>();
 
         @Override
         protected Void doInBackground(Integer... integers) {
@@ -327,14 +326,14 @@ public class DetailActivity extends AppCompatActivity implements
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            mActivityTrailer = trailersForMovies;
+            mMovieTrailer = trailersForMovies;
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            setupTrailerRecyclerView();
+            setMovieTrailers();
         }
     }
 
@@ -348,8 +347,10 @@ public class DetailActivity extends AppCompatActivity implements
 
                 @Override
                 public void onLoadFinished(Loader<String> loader, String data) {
-                    TextView textView = findViewById(R.id.movie_length);
-                    textView.setText(getString(R.string.minutes_text, data));
+                    if (mMovieInfoHolder != null) {
+                        mMovieInfoHolder.setMovieLength(data);
+                        getMovieTrailers();
+                    }
                 }
 
                 @Override
@@ -384,14 +385,19 @@ public class DetailActivity extends AppCompatActivity implements
 
                 @Override
                 public void onLoadFinished(Loader<ArrayList<MovieReviewObject>> loader, ArrayList<MovieReviewObject> data) {
+                    if (data.size() > 0) {
+                        mMovieReviews = data;
+                        setupAdaptorsData();
+                    }
 
-                    mReviewsRecyclerView.hasFixedSize();
+//                    mReviewsRecyclerView.hasFixedSize();
 
 
-                    int size = data != null ? data.size() : 0;
+                    //int size = data != null ? data.size() : 0;
 
-                    RecyclerView.Adapter mAdaptor = new MovieReviewsAdaptor(size, data);
-                    mReviewsRecyclerView.setAdapter(mAdaptor);
+                    //RecyclerView.Adapter mAdaptor = new ComplexMovieAdaptor(size, data);
+                    //mMovieDetailRecyclerView.setNestedScrollingEnabled(false);
+                    //mMovieDetailRecyclerView.setAdapter(mAdaptor);
                 }
 
                 @Override
@@ -402,11 +408,8 @@ public class DetailActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (mReviewRecyclerViewState != null){
-            mReviewsRecyclerView.getLayoutManager().onRestoreInstanceState(mReviewRecyclerViewState);
-        }
-        if (mTrailerRecyclerViewState != null){
-            mTrailerRecyclerView.getLayoutManager().onRestoreInstanceState(mTrailerRecyclerViewState);
+        if (mMovieDetailLayoutManagerState != null) {
+            mMovieDetailRecyclerView.getLayoutManager().onRestoreInstanceState(mMovieDetailLayoutManagerState);
         }
     }
 }

@@ -19,7 +19,7 @@ public class UriBuilderUtil {
     private final static String BASE_POPULAR_URL = "http://api.themoviedb.org/3/movie/popular";
     private final static String BASE_RATED_URL = "http://api.themoviedb.org/3/movie/top_rated";
     private final static String BASE_TRAILER_URL ="http://api.themoviedb.org/3/movie/";
-    private static final String API_KEY = "80c08a7febb5450bffb919f2c3416264";
+    private static final String API_KEY = "";
     private static final String BASE_VIDEO = "v";
 
     private final static String BASE_YOUTUBE_URL = "https://www.youtube.com/watch?";

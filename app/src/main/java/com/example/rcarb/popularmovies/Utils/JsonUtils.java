@@ -1,5 +1,9 @@
 package com.example.rcarb.popularmovies.Utils;
 
+import com.example.rcarb.popularmovies.Objects.MovieInfoDetailObject;
+import com.example.rcarb.popularmovies.Objects.MovieReviewObject;
+import com.example.rcarb.popularmovies.Objects.TrailerInfoObject;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +15,7 @@ public class JsonUtils {
 
     //Parses the movieArray object that haolds all the movies for popular or top rated parse.
 
-    public static ArrayList<MovieInfoHolder> parseJsonObject(String jsonDataString, String listType) throws JSONException {
+    public static ArrayList<MovieInfoDetailObject> parseJsonObject(String jsonDataString, String listType) throws JSONException {
 
         JSONObject jsonData = new JSONObject(jsonDataString);
 
@@ -19,7 +23,7 @@ public class JsonUtils {
         JSONArray resultsInData = jsonData.getJSONArray("results");
 
         //StringArray to hold the movie poster
-        ArrayList<MovieInfoHolder> movieArray = new ArrayList<>();
+        ArrayList<MovieInfoDetailObject> movieArray = new ArrayList<>();
         for (int i = 0; i < resultsInData.length(); i++) {
 
             JSONObject object = resultsInData.getJSONObject(i);
@@ -32,8 +36,8 @@ public class JsonUtils {
                 String movieRating = object.get("vote_average").toString();
                 String movieDescription = (String) object.get("overview");
 
-                //Add the movie values into MovieInfoHolder.
-                MovieInfoHolder movieInfo = new MovieInfoHolder();
+                //Add the movie values into MovieInfoDetailObject.
+                MovieInfoDetailObject movieInfo = new MovieInfoDetailObject();
                 movieInfo.setMovieId(movieId);
                 movieInfo.setMoviePoster(moviePoster);
                 movieInfo.setMovieTitle(movieTitle);
@@ -45,7 +49,7 @@ public class JsonUtils {
                 movieInfo.setColumn(0);
                 movieInfo.setListDescription(listType);
 
-                movieInfo.setMovieLength(-2);
+                movieInfo.setMovieLength("");
                 movieArray.add(i, movieInfo);
 
             }
@@ -55,13 +59,13 @@ public class JsonUtils {
 
     //Creates the array object for the  trailers of specified movie.
 
-    public static ArrayList<TrailerInfoHolder> parseJsonTrailerObject(String jsonDataString)throws JSONException{
+    public static ArrayList<TrailerInfoObject> parseJsonTrailerObject(String jsonDataString)throws JSONException{
         JSONObject jsondata = new JSONObject(jsonDataString);
 
         JSONArray resultsInData = jsondata.getJSONArray("results");
 
         //ArrayList that will hold the movie trailer keys
-        ArrayList<TrailerInfoHolder> trailerArray =  new ArrayList<>();
+        ArrayList<TrailerInfoObject> trailerArray =  new ArrayList<>();
         for (int i = 0; i < resultsInData.length(); i++){
             JSONObject object = resultsInData.getJSONObject(i);
             if (object != null){
@@ -71,7 +75,7 @@ public class JsonUtils {
                 String trailerName = object.getString("name");
 
                 //add the movie key to the array object
-                TrailerInfoHolder trailerKeyHolder = new TrailerInfoHolder();
+                TrailerInfoObject trailerKeyHolder = new TrailerInfoObject();
                 trailerKeyHolder.setTrailerKey(movieKey);
                 trailerKeyHolder.setTrailerName(trailerName);
                 trailerArray.add(trailerKeyHolder);

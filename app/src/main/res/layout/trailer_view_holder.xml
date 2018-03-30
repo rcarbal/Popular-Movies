@@ -6,7 +6,7 @@
     <ImageView
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginLeft="45dp"
+        android:layout_marginLeft="30dp"
         android:src="@drawable/play_button"
         android:id="@+id/trailer_button"
         android:contentDescription="TODO"

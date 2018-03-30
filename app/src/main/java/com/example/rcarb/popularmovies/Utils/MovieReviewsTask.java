@@ -6,7 +6,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.example.rcarb.popularmovies.DetailActivity;
-import com.example.rcarb.popularmovies.MovieReviewsAdaptor;
+import com.example.rcarb.popularmovies.ComplexMovieAdaptor;
+import com.example.rcarb.popularmovies.Objects.MovieReviewObject;
 import com.example.rcarb.popularmovies.R;
 
 import org.json.JSONException;
@@ -64,7 +65,7 @@ public class MovieReviewsTask extends AsyncTask<Integer, Void, String> {
 
         int size = movieArrayOfMovieReviews != null ? movieArrayOfMovieReviews.size() : 0;
 
-        RecyclerView.Adapter mAdaptor = new MovieReviewsAdaptor(size, movieArrayOfMovieReviews);
+        RecyclerView.Adapter mAdaptor = new ComplexMovieAdaptor(null, null);
         mRecyclerView.setNestedScrollingEnabled(false);
         mRecyclerView.setAdapter(mAdaptor);
 

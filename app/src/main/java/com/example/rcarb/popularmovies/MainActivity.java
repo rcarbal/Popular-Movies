@@ -22,13 +22,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.example.rcarb.popularmovies.Data.CheckConnectionLoader;
 import com.example.rcarb.popularmovies.Data.Contract;
+import com.example.rcarb.popularmovies.Objects.MovieInfoDetailObject;
 import com.example.rcarb.popularmovies.Utils.CheckNetworkConnection;
 import com.example.rcarb.popularmovies.Utils.JsonUtils;
-import com.example.rcarb.popularmovies.Utils.MovieInfoHolder;
 import com.example.rcarb.popularmovies.Utils.NetWorkUtils;
 import com.example.rcarb.popularmovies.Utils.UriBuilderUtil;
 
@@ -46,7 +45,7 @@ public class MainActivity extends AppCompatActivity
     private static final String DB_FULL_PATH = "/data/data/com.example.rcarb.popularmovies/databases/FavoriteMovies.db";
 
     private RecyclerView mRecyclerView;
-    private ArrayList<MovieInfoHolder> mCurrentMovies;
+    private ArrayList<MovieInfoDetailObject> mCurrentMovies;
     private FetchMovieTask task;
     private Context mContext;
     private Cursor mCursor;
@@ -221,8 +220,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     //Gets the list of movies depending on the stateOfActivity value
-    private ArrayList<MovieInfoHolder> getListOfMovies(String typeOfMovie) {
-        ArrayList<MovieInfoHolder> movies = new ArrayList<>();
+    private ArrayList<MovieInfoDetailObject> getListOfMovies(String typeOfMovie) {
+        ArrayList<MovieInfoDetailObject> movies = new ArrayList<>();
         for (int i = 0; i < mCurrentMovies.size(); i++) {
             if (mCurrentMovies.get(i).getListDescrition().equals(typeOfMovie)) {
                 movies.add(mCurrentMovies.get(i));
@@ -248,7 +247,7 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(MainActivity.this, DetailActivity.class);
 
         //Pass throught the MovieHolder object
-        MovieInfoHolder holder = mCurrentMovies.get(getIndexOfCurrentMovies(movieId));
+        MovieInfoDetailObject holder = mCurrentMovies.get(getIndexOfCurrentMovies(movieId));
         long id = getMovieIdColumn(movieId);
         if (id == -1) {
 
@@ -261,7 +260,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     //Converts the current Cursor data into an arraylist.
-    private ArrayList<MovieInfoHolder> convertCursorToMovienfoHolder() {
+    private ArrayList<MovieInfoDetailObject> convertCursorToMovienfoHolder() {
         int movieId;
         String moviePoster;
         String movieTitle;
@@ -272,7 +271,7 @@ public class MainActivity extends AppCompatActivity
         boolean mFavorite;
         long databaseColumn;
 
-        ArrayList<MovieInfoHolder> movieArray = new ArrayList<>();
+        ArrayList<MovieInfoDetailObject> movieArray = new ArrayList<>();
 
 
         if (mCursor.moveToFirst()) {
@@ -290,8 +289,8 @@ public class MainActivity extends AppCompatActivity
                     mFavorite = true;
                     databaseColumn = mCursor.getLong(mCursor.getColumnIndex(Contract.MovieEntry._ID));
 
-                    //Add the movie values into MovieInfoHolder.
-                    MovieInfoHolder movieInfo = new MovieInfoHolder();
+                    //Add the movie values into MovieInfoDetailObject.
+                    MovieInfoDetailObject movieInfo = new MovieInfoDetailObject();
                     movieInfo.setMovieId(movieId);
                     movieInfo.setMoviePoster(moviePoster);
                     movieInfo.setMovieTitle(movieTitle);
@@ -406,9 +405,9 @@ public class MainActivity extends AppCompatActivity
                 String rated = s[1];
 
 
-                ArrayList<MovieInfoHolder> movieArrayPopular = new ArrayList<>();
-                ArrayList<MovieInfoHolder> movieArrayRated = new ArrayList<>();
-                ArrayList<MovieInfoHolder> completeListMovies = new ArrayList<>();
+                ArrayList<MovieInfoDetailObject> movieArrayPopular = new ArrayList<>();
+                ArrayList<MovieInfoDetailObject> movieArrayRated = new ArrayList<>();
+                ArrayList<MovieInfoDetailObject> completeListMovies = new ArrayList<>();
 
 
                 try {
@@ -424,7 +423,7 @@ public class MainActivity extends AppCompatActivity
 
                 mCurrentMovies = completeListMovies;
 
-                ArrayList<MovieInfoHolder> listMoviesTypes = getListOfMovies(stateOfActivity);
+                ArrayList<MovieInfoDetailObject> listMoviesTypes = getListOfMovies(stateOfActivity);
                 int arrayListSize = listMoviesTypes.size();
 
 
@@ -435,7 +434,7 @@ public class MainActivity extends AppCompatActivity
 
             } else if (s == null) {
                 if (checkCursorData()) {
-                    ArrayList<MovieInfoHolder> movieArray = convertCursorToMovienfoHolder();
+                    ArrayList<MovieInfoDetailObject> movieArray = convertCursorToMovienfoHolder();
                     int arrayListSize = movieArray.size();
 
                     GridViewAdapter adapter = new GridViewAdapter(arrayListSize, movieArray, MainActivity.this);

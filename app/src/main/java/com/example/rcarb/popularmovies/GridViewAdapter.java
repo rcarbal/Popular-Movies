@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.example.rcarb.popularmovies.Utils.MovieInfoHolder;
+import com.example.rcarb.popularmovies.Objects.MovieInfoDetailObject;
 import com.example.rcarb.popularmovies.Utils.UriBuilderUtil;
 import com.squareup.picasso.Picasso;
 
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class GridViewAdapter extends RecyclerView.Adapter<GridViewAdapter.ImageViewHolder> {
 
     private final int mNumberOfItems;
-    private final ArrayList<MovieInfoHolder> mMovieArrayList;
+    private final ArrayList<MovieInfoDetailObject> mMovieArrayList;
     private final OnItemClicked mOnClick;
 
     @SuppressWarnings("unused")
@@ -28,7 +28,7 @@ public class GridViewAdapter extends RecyclerView.Adapter<GridViewAdapter.ImageV
     }
 
 
-    public GridViewAdapter(int numberOfItems, ArrayList<MovieInfoHolder> movies,
+    public GridViewAdapter(int numberOfItems, ArrayList<MovieInfoDetailObject> movies,
                            OnItemClicked listener) {
         this.mNumberOfItems = numberOfItems;
         this.mMovieArrayList = movies;
