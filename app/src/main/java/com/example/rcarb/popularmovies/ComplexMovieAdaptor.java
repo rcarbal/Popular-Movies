@@ -25,6 +25,7 @@ public class ComplexMovieAdaptor extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private final ArrayList<Object> mItems;
     private final OnItemClicked mItemClicked;
+
     public interface OnItemClicked {
         void onItemClicked(int integer);
     }
@@ -35,7 +36,7 @@ public class ComplexMovieAdaptor extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public ComplexMovieAdaptor(ArrayList<Object> items, OnItemClicked listener){
         mItems = items;
-         mItemClicked = listener;
+        mItemClicked = listener;
     }
 
     @Override

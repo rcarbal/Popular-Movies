@@ -5,13 +5,16 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.rcarb.popularmovies.ComplexMovieAdaptor;
 import com.example.rcarb.popularmovies.R;
 
 /**
  * Created by rcarb on 3/29/2018.
  */
 
-public class MovieTrailerHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+public class MovieTrailerHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
+        ComplexMovieAdaptor.OnItemClicked{
+
 
     private TextView mTrailerTextview;
     private ImageView mTrailerButton;
@@ -38,5 +41,10 @@ public class MovieTrailerHolder extends RecyclerView.ViewHolder implements View.
 
     @Override
     public void onClick(View view) {
+    }
+
+    @Override
+    public void onItemClicked(int integer) {
+
     }
 }
