@@ -1,4 +1,4 @@
-# PopularMovies_Part2
+# Popular Movies
 This is the second project for Udaicy's Android development Nanodegree.
 
 ## Getting Started
