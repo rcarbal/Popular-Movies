@@ -12,6 +12,17 @@ Add the key to the app level build.grade, buildConfigField("String", "API_KEY","
 - View movies list based on categories such as, "Top Rated", "Popular", "Favorites".
 - Show movie detail, trailers, and reviews.
 
+## Implementations
+- Picaaso image loading.
+- Network status checking.
+- SQLite Database storage.
+- Content Provider.
+- Uri mathing.
+- JSON parsing.
+- Loader Asynctask.
+- Activity and layout state preservation.
+
+
 ## Screenshots 
 
 <img src="https://user-images.githubusercontent.com/20021751/38431148-2b07019a-3978-11e8-94c4-eb944b5bce60.png" width="330">
