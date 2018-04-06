@@ -50,10 +50,6 @@ public class MainActivity extends AppCompatActivity
     private Context mContext;
     private Cursor mCursor;
     private String[] mMoviesArray;
-
-
-    //Database global variables
-
     private String stateOfActivity = "";
     private boolean favoriteState = false;
 
@@ -83,38 +79,25 @@ public class MainActivity extends AppCompatActivity
 
         }
         mContext = MainActivity.this;
-
-        //initialize the RecyclerView
         mRecyclerView = findViewById(R.id.recycler_view);
-        //The Grid will not change size
         mRecyclerView.setHasFixedSize(true);
-
-        //Sets up the layout manager as a GridView.
         LinearLayoutManager layoutManager = new GridLayoutManager(this, numberOfColumns());
-
-        //Attaches the adaptor
         mRecyclerView.setLayoutManager(layoutManager);
-
-
         task = new FetchMovieTask(mContext, mRecyclerView);
+
         callNetwork();
 
     }
 
     //Returns int to dynamically calculate for a layout of varied screen sizes
     private int numberOfColumns() {
-
-        //gets the current screen specs
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 
         int width = displayMetrics.widthPixels;
         float xdpi = displayMetrics.xdpi;
-        //estimates the inches of screen width and rounds it.
-        int getInches =Math.round(width/xdpi);
-        if (getInches< 3) return 2;
-
-        //divider by which to divide the width.
+        int getInches = Math.round(width / xdpi);
+        if (getInches < 3) return 2;
         int widthDivider = 500;
         return width / widthDivider;
 
@@ -131,19 +114,14 @@ public class MainActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        //depending on the item selected on the menu item, the proper query param will be used.
-
         if (id == R.id.popular) {
             FetchMovieTask task = new FetchMovieTask(mContext, mRecyclerView);
             task.execute("popular");
-
-
         }
         if (id == R.id.top_rated) {
             FetchMovieTask task = new FetchMovieTask(mContext, mRecyclerView);
             task.execute("top_rated");
         }
-
         if (id == R.id.favorite_database) {
             FetchMovieTask task = new FetchMovieTask(mContext, mRecyclerView);
             task.execute("favorites");
@@ -196,7 +174,6 @@ public class MainActivity extends AppCompatActivity
         if (!checkCursorData()) {
             return -1;
         }
-
         if (mCursor.moveToFirst()) {
             do {
                 passedinMovieId = mCursor.getInt(mCursor.getColumnIndex(Contract.MovieEntry.COLUMN_MOVIE_ID));
@@ -209,7 +186,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    //Checks to see if the global cursor is holding any moviw info
+    //Checks to see if the global cursor is holding any movie info
     private boolean checkCursorData() {
         Cursor cursor = getAllFavoriteMovies();
         if (cursor != null && cursor.getCount() > 0) {
@@ -219,7 +196,6 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
-    //Gets the list of movies depending on the stateOfActivity value
     private ArrayList<MovieInfoDetailObject> getListOfMovies(String typeOfMovie) {
         ArrayList<MovieInfoDetailObject> movies = new ArrayList<>();
         for (int i = 0; i < mCurrentMovies.size(); i++) {
@@ -242,11 +218,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onItemClick(int mNumberOfItemsIndex, int movieId) {
-
-        //Takes the clicked RecyclerView vies id and saves the selected movie information
         Intent intent = new Intent(MainActivity.this, DetailActivity.class);
 
-        //Pass throught the MovieHolder object
         MovieInfoDetailObject holder = mCurrentMovies.get(getIndexOfCurrentMovies(movieId));
         long id = getMovieIdColumn(movieId);
         if (id == -1) {
@@ -449,10 +422,9 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onCancelled() {
             super.onCancelled();
-            if (isCancelled()){
+            if (isCancelled()) {
                 showSnackBar();
             }
-
         }
     }
 
@@ -470,14 +442,11 @@ public class MainActivity extends AppCompatActivity
     protected void onPostResume() {
         super.onPostResume();
 
-        //if favorites list was displayed then all the movies were removed from favorites
         if (!checkCursorData() && favoriteState) {
             favoriteState = false;
             task = new FetchMovieTask(mContext, mRecyclerView);
             task.execute(stateOfActivity);
         }
-
-        //if the cursor is not null
         if (checkCursorData() && favoriteState) {
             task = new FetchMovieTask(mContext, mRecyclerView);
             task.execute("favorites");
@@ -504,7 +473,7 @@ public class MainActivity extends AppCompatActivity
             };
 
     //Object to use as the snackbar's listener.
-    public class SnackListener implements View.OnClickListener{
+    public class SnackListener implements View.OnClickListener {
 
         @Override
         public void onClick(View view) {

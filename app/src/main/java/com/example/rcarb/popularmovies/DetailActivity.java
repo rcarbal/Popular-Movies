@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.rcarb.popularmovies.Data.Contract;
 import com.example.rcarb.popularmovies.Data.GetMovieDetailLoader;
@@ -28,17 +29,14 @@ import com.example.rcarb.popularmovies.Objects.MovieReviewObject;
 import com.example.rcarb.popularmovies.Utils.NetWorkUtils;
 import com.example.rcarb.popularmovies.Objects.TrailerInfoObject;
 import com.example.rcarb.popularmovies.Utils.UriBuilderUtil;
-import com.example.rcarb.popularmovies.ViewHolders.SimpleViewHolder;
 
 import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 @SuppressWarnings({"WeakerAccess", "CanBeFinal"})
-public class DetailActivity extends AppCompatActivity implements
-        MovieTrailerAdaptor.TrailerOnClickListener {
+public class DetailActivity extends AppCompatActivity implements ComplexMovieAdaptor.OnItemClicked  {
 
 
     private MovieInfoDetailObject mMovieInfoHolder;
@@ -60,23 +58,12 @@ public class DetailActivity extends AppCompatActivity implements
     private static final int GET_MOVIE_REVIEWS = 1;
 
     private boolean mIsRestored = false;
-
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mMovieDetailLayoutManagerState = mMovieDetailRecyclerView.getLayoutManager().onSaveInstanceState();
-        outState.putParcelable(IntentConstants.MOVIE_TRAILER_LAYOUT_MANGER, mMovieDetailLayoutManagerState);
-        getViewPositionOfReviews();
-
-
-    }
+    private boolean mIsFavorite;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_detail);
         setContentView(R.layout.test_layout);
 
 
@@ -87,8 +74,6 @@ public class DetailActivity extends AppCompatActivity implements
 
 
         getActivityIntent();
-//        getMovieReviewAndLength();
-//        loadMovieReviews();
     }
 
     private void setupAdaptorsData() {
@@ -97,14 +82,18 @@ public class DetailActivity extends AppCompatActivity implements
         if (mMovieInfoHolder != null) {
             mConcateData.add(mMovieInfoHolder);
         }
-        if (mMovieTrailer.size() > 0) {
-            mConcateData.addAll(mMovieTrailer);
+        if (mMovieTrailer != null) {
+            if (mMovieTrailer.size() > 0){
+                mConcateData.addAll(mMovieTrailer);
+            }
         }
         mConcateData.add("hello");
-        if (mMovieReviews.size() > 0) {
-            mConcateData.addAll(mMovieReviews);
+        if (mMovieReviews != null) {
+            if (mMovieReviews.size() >0){
+                mConcateData.addAll(mMovieReviews);
+            }
         }
-        mAdaptor = new ComplexMovieAdaptor(mConcateData, null);
+        mAdaptor = new ComplexMovieAdaptor(mConcateData, this);
         bindData();
     }
 
@@ -112,14 +101,7 @@ public class DetailActivity extends AppCompatActivity implements
         mMovieDetailRecyclerView.setAdapter(mAdaptor);
     }
 
-    private int getViewPositionOfReviews() {
-        RecyclerView.LayoutManager layoutManager = mMovieDetailRecyclerView.getLayoutManager();
-        LinearLayoutManager manager = (LinearLayoutManager) layoutManager;
-        int firstPosition = manager.findFirstVisibleItemPosition();
-        return firstPosition;
-    }
-
-    private void loadMovieReviews() {
+    private void getMovieReviews() {
         Bundle bundle = new Bundle();
         bundle.putInt(IntentConstants.ARGS_GET_MOVIE_ID, mMovieInfoHolder.getMovieId());
 
@@ -139,7 +121,6 @@ public class DetailActivity extends AppCompatActivity implements
         } else {
             getMovieLength();
         }
-
     }
 
     private void getMovieLength() {
@@ -152,7 +133,6 @@ public class DetailActivity extends AppCompatActivity implements
         }
     }
 
-    //Get movie trailers
     private void getMovieTrailers() {
 
         task = new GetMovieInfoTask();
@@ -160,25 +140,8 @@ public class DetailActivity extends AppCompatActivity implements
 
     }
 
-    private void setMovieTrailers() {
-
-        if (mMovieTrailer.size() > 0) {
-
-            List<TrailerInfoObject> list = mMovieTrailer;
-            mMovieDetailRecyclerView.hasFixedSize();
-            RecyclerView.Adapter mAdaptor = new MovieTrailerAdaptor(list,
-                    this);
-
-            //mMovieDetailRecyclerView.setAdapter(mAdaptor);
-            loadMovieReviews();
-
-        }
-    }
-
 
     //Set the AsyncTask Activity
-
-
     //Gets the intent extras and sets up a MovieInfoDetailObject object.
     private void getActivityIntent() {
         if (!mIsRestored) {
@@ -193,72 +156,11 @@ public class DetailActivity extends AppCompatActivity implements
 
     @SuppressLint("SetTextI18n")
     private void setupLayout() {
-//        //Set Movie Poster
-//        ImageView posterImage = findViewById(R.id.poster_image);
-//        Picasso.with(DetailActivity.this).load(UriBuilderUtil.imageDownload(mMovieInfoHolder.getMoviePoster()))
-//                .into(posterImage);
-//        //Set Movie Title
-//        TextView movieTitle = findViewById(R.id.movie_title);
-//        movieTitle.setText(mMovieInfoHolder.getMovieTitle());
-//
-//        //Set Release Date
-//        TextView movieReleaseDate = findViewById(R.id.release_date);
-//        String dateReleased = mMovieInfoHolder.getMovieReleaseDate();
-//        String extractYear = dateReleased.substring(0, 4);
-//        movieReleaseDate.setText(extractYear);
-//
-//        //Set movie rating
-//        TextView movieRating = findViewById(R.id.user_rating);
-//        movieRating.setText(mMovieInfoHolder.getMovieRating() + "/10");
-//        movieRating.setTypeface(null, Typeface.BOLD_ITALIC);
-//
-//        //Set Movie Description
-//        TextView movieDescription = findViewById(R.id.movieDescription);
-//        movieDescription.setText(mMovieInfoHolder.getMovieDescription());
-//
-//        //Sets ImageViews' onClick attributes
-//        final ImageView favorite = findViewById(R.id.favorite);
-//        favorite.setClickable(true);
-//        final ImageView notFavorite = findViewById(R.id.not_favorite);
-//        notFavorite.setClickable(true);
-//
-//
-//        if (mMovieInfoHolder.getFavorite()) {
-//            favorite.setVisibility(View.VISIBLE);
-//            notFavorite.setVisibility(View.GONE);
-//        }
-//        if (!mMovieInfoHolder.getFavorite()) {
-//            favorite.setVisibility(View.GONE);
-//            notFavorite.setVisibility(View.VISIBLE);
-//        }
-//
-//        favorite.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                mMovieInfoHolder.setFavorite(false);
-//                removeFromFavorite(mMovieInfoHolder.getColumn());
-//                favorite.setVisibility(View.GONE);
-//                notFavorite.setVisibility(View.VISIBLE);
-//                Toast.makeText(DetailActivity.this, "\"" + mMovieInfoHolder.getMovieTitle() + "\"" +
-//                        " was removed from favorites", Toast.LENGTH_SHORT).show();
-//
-//
-//            }
-//        });
-//
-//        notFavorite.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                mMovieInfoHolder.setFavorite(true);
-//                setAsFavorite();
-//                favorite.setVisibility(View.VISIBLE);
-//                notFavorite.setVisibility(View.GONE);
-//                Toast.makeText(DetailActivity.this, "\"" + mMovieInfoHolder.getMovieTitle() + "\"" +
-//                        " was set from favorites", Toast.LENGTH_SHORT).show();
-//            }
-//        });
 
-        currentMovieId = mMovieInfoHolder.getMovieId();
+        if (mMovieInfoHolder != null) {
+            mIsFavorite = mMovieInfoHolder.getFavorite();
+            currentMovieId = mMovieInfoHolder.getMovieId();
+        }
         getMovieLength();
     }
 
@@ -288,7 +190,18 @@ public class DetailActivity extends AppCompatActivity implements
         String stringId = Long.toString(id);
         Uri uri = Contract.MovieEntry.BASE_CONTENT_URI_FAVORITES;
         uri = uri.buildUpon().appendPath(stringId).build();
-        getContentResolver().delete(uri, null, null);
+        int deleted = getContentResolver().delete(uri, null, null);
+        if (deleted!= -1){
+            Toast.makeText(DetailActivity.this, "\"" + mMovieInfoHolder.getMovieTitle() + "\"" +
+                    " was removed from favorites", Toast.LENGTH_SHORT).show();
+            mMovieInfoHolder.setFavorite(false);
+            mIsFavorite = false;
+            updateAdaptorData();
+        }
+    }
+
+    private void updateAdaptorData() {
+        mAdaptor.notifyDataSetChanged();
     }
 
     private void showSnackBar() {
@@ -299,14 +212,35 @@ public class DetailActivity extends AppCompatActivity implements
         snackbar.show();
     }
 
-
     @Override
-    public void onClickTrailer(String movieKey) {
-        String trailerKey = movieKey;
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(UriBuilderUtil.buildTrailerUri(trailerKey));
-        startActivity(intent);
+    public void onItemClick(String movieKey, boolean favoriteClicked) {
+        if (!movieKey.equals("")){
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(UriBuilderUtil.buildTrailerUri(movieKey));
+            startActivity(intent);
+        }else {
+            if (favoriteClicked){
+                changetFavoriteStatus();
+        }else if (!favoriteClicked){
+                changetFavoriteStatus();
+            }
+        }
     }
+
+    private void changetFavoriteStatus() {
+        if (!mIsFavorite){
+            mMovieInfoHolder.setFavorite(true);
+            setAsFavorite();
+            Toast.makeText(DetailActivity.this, "\"" + mMovieInfoHolder.getMovieTitle() + "\"" +
+                    " was set from favorites", Toast.LENGTH_SHORT).show();
+            mMovieInfoHolder.setFavorite(true);
+            mIsFavorite = true;
+            updateAdaptorData();
+        } else if(mIsFavorite){
+            removeFromFavorite(mMovieInfoHolder.getColumn());
+        }
+    }
+
 
     @SuppressLint("StaticFieldLeak")
     class GetMovieInfoTask extends AsyncTask<Integer, Void, Void> {
@@ -333,7 +267,7 @@ public class DetailActivity extends AppCompatActivity implements
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            setMovieTrailers();
+            getMovieReviews();
         }
     }
 
@@ -387,17 +321,8 @@ public class DetailActivity extends AppCompatActivity implements
                 public void onLoadFinished(Loader<ArrayList<MovieReviewObject>> loader, ArrayList<MovieReviewObject> data) {
                     if (data.size() > 0) {
                         mMovieReviews = data;
-                        setupAdaptorsData();
                     }
-
-//                    mReviewsRecyclerView.hasFixedSize();
-
-
-                    //int size = data != null ? data.size() : 0;
-
-                    //RecyclerView.Adapter mAdaptor = new ComplexMovieAdaptor(size, data);
-                    //mMovieDetailRecyclerView.setNestedScrollingEnabled(false);
-                    //mMovieDetailRecyclerView.setAdapter(mAdaptor);
+                    setupAdaptorsData();
                 }
 
                 @Override

@@ -12,18 +12,23 @@ import com.example.rcarb.popularmovies.R;
  * Created by rcarb on 3/29/2018.
  */
 
-public class MovieTrailerHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
-        ComplexMovieAdaptor.OnItemClicked{
+public class MovieTrailerHolder extends RecyclerView.ViewHolder{
 
 
     private TextView mTrailerTextview;
     private ImageView mTrailerButton;
 
-    public MovieTrailerHolder(View itemView) {
+    public MovieTrailerHolder(View itemView, final ComplexMovieAdaptor.OnItemClicked onItemClicked) {
         super(itemView);
         mTrailerButton = itemView.findViewById(R.id.trailer_button);
         mTrailerTextview = itemView.findViewById(R.id.trailer_textview_holder);
-        itemView.setOnClickListener(this);
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String trailerKey =(String) mTrailerButton.getContentDescription();
+                onItemClicked.onItemClick(trailerKey, false);
+            }
+        });
     }
 
     public void setTrailerTextView(TextView trailer){
@@ -39,12 +44,4 @@ public class MovieTrailerHolder extends RecyclerView.ViewHolder implements View.
         return  mTrailerButton;
     }
 
-    @Override
-    public void onClick(View view) {
-    }
-
-    @Override
-    public void onItemClicked(int integer) {
-
-    }
 }

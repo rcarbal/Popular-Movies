@@ -24,19 +24,20 @@ import java.util.ArrayList;
 public class ComplexMovieAdaptor extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     private final ArrayList<Object> mItems;
-    private final OnItemClicked mItemClicked;
 
-    public interface OnItemClicked {
-        void onItemClicked(int integer);
-    }
 
     private final int MOVIE_INFO = 1;
     private final int MOVIE_TRAILER = 2;
     private final int MOVIE_REVIEW =3;
+    private final OnItemClicked mOnCLick;
+
+    public interface OnItemClicked{
+        void onItemClick(String movieKey, boolean isFavorite);
+    }
 
     public ComplexMovieAdaptor(ArrayList<Object> items, OnItemClicked listener){
         mItems = items;
-        mItemClicked = listener;
+        mOnCLick = listener;
     }
 
     @Override
@@ -45,14 +46,16 @@ public class ComplexMovieAdaptor extends RecyclerView.Adapter<RecyclerView.ViewH
         RecyclerView.ViewHolder  viewHolder;
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
+
+
         switch (viewType){
             case MOVIE_INFO:
                 View v1 = inflater.inflate(R.layout.movie_detail_holder, parent, false);
-                viewHolder = new MovieInfoDetailHolder(v1);
+                viewHolder = new MovieInfoDetailHolder(v1, mOnCLick);
                 break;
             case MOVIE_TRAILER:
                 View v2 = inflater.inflate(R.layout.trailer_view_holder, parent, false);
-                viewHolder = new MovieTrailerHolder(v2);
+                viewHolder = new MovieTrailerHolder(v2, mOnCLick);
                 break;
             case MOVIE_REVIEW:
                 View v3 = inflater.inflate(R.layout.review_view_holder, parent, false);
@@ -126,9 +129,9 @@ public class ComplexMovieAdaptor extends RecyclerView.Adapter<RecyclerView.ViewH
         //Setup the favorite image
         if (movie.getFavorite()){
             v1.getFavorite().setVisibility(View.VISIBLE);
-            v1.getNotFavorite().setVisibility(View.INVISIBLE);
+            v1.getNotFavorite().setVisibility(View.GONE);
         }else if (!movie.getFavorite()){
-            v1.getFavorite().setVisibility(View.INVISIBLE);
+            v1.getFavorite().setVisibility(View.GONE);
             v1.getNotFavorite().setVisibility(View.VISIBLE);
         }
     }
