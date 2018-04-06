@@ -15,3 +15,6 @@ Add the key to the app level build.grade, buildConfigField("String", "API_KEY","
 ## Screenshots 
 <img src="https://user-images.githubusercontent.com/20021751/38431148-2b07019a-3978-11e8-94c4-eb944b5bce60.png" width="360">
 
+<img src="https://user-images.githubusercontent.com/20021751/38431148-2b07019a-3978-11e8-94c4-eb944b5bce60.png" width="360">
+
+<img src="https://user-images.githubusercontent.com/20021751/38431148-2b07019a-3978-11e8-94c4-eb944b5bce60.png" width="360">
