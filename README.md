@@ -1,5 +1,5 @@
 # Popular Movies
-This is the second project for Udaicy's Android development Nanodegree.
+This is the second project for Udaicy's Android development Nanodegree, writen in Java and Xml.
 
 ## Getting Started
 In order to run this application you need to The Movie DB API key. You can request a development key here:
